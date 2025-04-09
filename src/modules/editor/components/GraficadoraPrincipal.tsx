@@ -1,79 +1,104 @@
-import React, { useRef, useState } from "react";
+import { Layer, Stage, Transformer } from "react-konva";
+import { useShapes } from "../hooks/useShapes";
 import SidebarGraficadora from "./sidebar/SidebarGraficadora";
-import { Stage, Layer, Rect, Circle, Text, Line, Transformer } from "react-konva";
+import Toolbar from "./toolbar/Toolbar";
 import SidebarDetalles from "./sidebar/SidebarDetalles";
+import ShapeRenderer from "./canvas/ShapeRenderer";
+import { useCanvas } from "../hooks/useCanvas";
+
 
 const GraficadoraPrincipal = () => {
-  const [selectedId, setSelectedId] = useState(null); // Estado para rastrear el objeto seleccionado
-  const transformerRef = useRef(null); // Referencia al Transformer
-  const rectRef = useRef(null); // Referencia al Rectángulo
 
-  const handleSelect = (e) => {
-    setSelectedId(e.target.name()); // Establece el ID del objeto seleccionado
-  };
+  const { shapes,
+    selectedId,
+    addShape,
+    updateShape,
+    selectShape,
+    deselectShape,
+    deleteShape
+  } = useShapes(); // Llama al hook para manejar las figuras en el lienzo
 
-  const handleDeselect = (e) => {
-    if (e.target === e.target.getStage()) {
-      setSelectedId(null); // Deselecciona si se hace clic fuera del objeto
-    }
-  };
-
+  const {
+    stageRef,
+    layerRef,
+    transformerRef,
+    handleStageClick
+  } = useCanvas({ selectedId, shapes, onSelect: selectShape, onDeselect: deselectShape });
   return (
-    <>
-      <section className="flex">
-        <section className="w-[13%]">
-          <SidebarGraficadora />
+    <div className="flex flex-col h-screen">
+      <div className="flex flex-1 overflow-hidden">
+        <section className="w-[13%] h-full">
+          <SidebarGraficadora onToolSelect={addShape} />
         </section>
 
-        <section className="w-[74%]">
+        <section className="w-[74%] h-full bg-gray-100">
           <Stage
-            width={window.innerWidth}
-            height={window.innerHeight}
-            onMouseDown={handleDeselect} // Deseleccionar al hacer clic fuera
+            ref={stageRef}
+            width={window.innerWidth * 0.74}
+            height={window.innerHeight - 80}
+            onMouseDown={handleStageClick}
+            className="bg-white shadow-md"
           >
-            <Layer>
-              <Text text="Pizarra" fontSize={15} />
-              <Rect
-                x={20}
-                y={50}
-                width={100}
-                height={100}
-                fill="red"
-                name="rect1" // Nombre único para identificar el objeto
-                draggable
-                onClick={handleSelect} // Seleccionar al hacer clic
-                ref={rectRef}
-              />
-              <Circle x={200} y={100} radius={50} fill="green" draggable />
-              <Line
-                points={[25, 300, 130, 300]} // Coordenadas [x1, y1, x2, y2]
-                stroke="black" // Color de la línea
-                strokeWidth={10} // Grosor de la línea
-                draggable
-              />
-              {/* Transformer para redimensionar */}
-              {selectedId === "rect1" && (
-                <Transformer
-                  ref={transformerRef}
-                  nodes={[rectRef.current]} // Vincula el Transformer al Rectángulo
-                  boundBoxFunc={(oldBox, newBox) => {
-                    // Limita el tamaño mínimo del rectángulo
-                    if (newBox.width < 20 || newBox.height < 20) {
-                      return oldBox;
-                    }
-                    return newBox;
-                  }}
+            <Layer ref={layerRef}>
+              {shapes.map((shape) => (
+                <ShapeRenderer
+                  key={shape.id}
+                  shape={shape}
+                  isSelected={selectedId === shape.id}
+                  onSelect={selectShape}
+                  onUpdate={updateShape}
                 />
-              )}
+              ))}
+
+              <Transformer
+                ref={transformerRef}
+                boundBoxFunc={(oldBox, newBox) => {
+                  if (newBox.width < 5 || newBox.height < 5) {
+                    return oldBox;
+                  }
+                  return newBox;
+                }}
+              />
             </Layer>
           </Stage>
         </section>
 
-        <section className="w-[13%]">
-          <SidebarDetalles/>
+        <section className="w-[13%] h-full">
+          <SidebarDetalles
+            selectedShape={shapes.find(shape => shape.id === selectedId)}
+            onUpdateShape={updateShape}
+          />
         </section>
-      </section>
-    </>
+      </div>
+
+      {/* <Toolbar 
+        onAddShape={addShape} 
+      /> */}
+
+      <Toolbar
+        onAddShape={addShape}
+        selectedId={selectedId}
+        onDeleteShape={() => selectedId && deleteShape(selectedId)}
+        onDuplicateShape={() => {
+          if (selectedId) {
+            const shapeToCopy = shapes.find(shape => shape.id === selectedId);
+            if (shapeToCopy) {
+              addShape(shapeToCopy.type);
+            }
+          }
+        }}
+        onRotateShape={() => {
+          if (selectedId) {
+            const shape = shapes.find(shape => shape.id === selectedId);
+            if (shape) {
+              updateShape(selectedId, { rotation: (shape.rotation + 90) % 360 });
+            }
+          }
+        }}
+      />
+
+
+    </div>
   );
 };
 
