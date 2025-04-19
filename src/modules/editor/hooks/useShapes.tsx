@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ShapeAttributes } from '../types/ShapeAttributes'
-import { createShape } from '../services/ShapeFactory';
+import { createShape } from '../services/shapeFactory';
 
 
 // Hook personalizado para manejar las figuras en el lienzo

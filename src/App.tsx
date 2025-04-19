@@ -1,13 +1,10 @@
-import Login from "./modules/auth/login/Login"
-import GraficadoraPrincipal from "./modules/editor/components/GraficadoraPrincipal"
+import AppRoutes from "./routers"
 
 function App() {
 
   return (
     <>
-      {/* <Login/> */}
-      <GraficadoraPrincipal/>
-      
+      <AppRoutes/>
     </>
   )
 }
