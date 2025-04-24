@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ShapeAttributes } from '../types/ShapeAttributes'
 import { createShape } from '../services/shapeFactory';
 
+//ME ayuda para hacer las gestiones de mis Figuras
 
 // Hook personalizado para manejar las figuras en el lienzo
 export const useShapes = () => {

@@ -29,7 +29,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const hasSelection = !!selectedId;
 
   return (
-    <div className="border-t border-gray-200 bg-white p-2 flex items-center justify-between sticky bottom-0 w-full">
+    <div className="border-t border-gray-200 bg-gris-semi-oscuro  p-2 flex items-center justify-between sticky bottom-0 w-full">
       {/* Herramientas de creación de figuras */}
       <div className="flex items-center space-x-2">
         <button 

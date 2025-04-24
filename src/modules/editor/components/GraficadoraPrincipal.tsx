@@ -25,19 +25,20 @@ const GraficadoraPrincipal = () => {
     handleStageClick
   } = useCanvas({ selectedId, shapes, onSelect: selectShape, onDeselect: deselectShape });
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex flex-1 overflow-hidden">
+    <div className="flex flex-col  h-screen">
+      <div className="flex flex-1  overflow-hidden">
+
         <section className="w-[13%] h-full">
           <SidebarGraficadora onToolSelect={addShape} />
         </section>
 
-        <section className="w-[74%] h-full bg-gray-100">
+        <section className="w-[74%]  h-full">
           <Stage
             ref={stageRef}
             width={window.innerWidth * 0.74}
             height={window.innerHeight - 80}
             onMouseDown={handleStageClick}
-            className="bg-white shadow-md"
+            className="bg-gris-oscuro shadow-md"
           >
             <Layer ref={layerRef}>
               {shapes.map((shape) => (

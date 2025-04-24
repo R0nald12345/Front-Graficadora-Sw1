@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+/* Agrego tus colores personalizados */
+:root {
+    --gris-semi-oscuro: #2D2D2D;
+    --gris-oscuro: #221E1E;
+
+  }
+
+/* Aplica el color en cualquier lugar de tu proyecto */
+.bg-gris-semi-oscuro {
+    background-color: var(--gris-semi-oscuro);
+  }
+
+.bg-gris-oscuro {
+    background-color: var(--gris-oscuro);
+}
+
+
+
+

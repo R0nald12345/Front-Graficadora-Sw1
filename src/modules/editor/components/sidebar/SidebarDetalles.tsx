@@ -9,7 +9,7 @@ interface SidebarDetallesProps {
 const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpdateShape }) => {
   if (!selectedShape) {
     return (
-      <div className="p-4 bg-gray-50 h-full">
+      <div className="p-4 bg-gris-semi-oscuro  h-full">
         <h2 className="text-lg font-semibold mb-4">Detalles</h2>
         <p className="text-gray-500">Selecciona una figura para editar sus propiedades</p>
       </div>
@@ -21,7 +21,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
   };
 
   return (
-    <div className="p-4 bg-gray-50 h-full">
+    <div className="p-4 bg-gris-semi-oscuro  h-full">
       <h2 className="text-lg font-semibold mb-4">Detalles de la Figura</h2>
       
       {/* Tipo de figura */}

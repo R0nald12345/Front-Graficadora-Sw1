@@ -2,6 +2,7 @@
 import React from "react";
 import { Rect, Circle, Star, Line } from "react-konva";
 import { ShapeAttributes } from "../../types/ShapeAttributes";
+import Konva from "konva";
 
 interface ShapeRendererProps {
   shape: ShapeAttributes;
@@ -16,14 +17,14 @@ const ShapeRenderer: React.FC<ShapeRendererProps> = ({
   onSelect, 
   onUpdate 
 }) => {
-  const handleDragEnd = (e) => {
+  const handleDragEnd = (e :Konva.KonvaEventObject<DragEvent>) => {
     onUpdate(shape.id, {
       x: e.target.x(),
       y: e.target.y()
     });
   };
 
-  const handleTransformEnd = (e) => {
+  const handleTransformEnd = (e :Konva.KonvaEventObject<DragEvent>) => {
     const node = e.target;
     
     onUpdate(shape.id, {
@@ -34,7 +35,7 @@ const ShapeRenderer: React.FC<ShapeRendererProps> = ({
       rotation: node.rotation()
     });
     
-    // Reset scale to avoid compounding scale values
+   
     node.scaleX(1);
     node.scaleY(1);
   };
