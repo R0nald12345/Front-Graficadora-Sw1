@@ -12,6 +12,11 @@ export class ShapeAttributes {
     draggable: boolean; // Indica si la figura es arrastrable
     rotation: number; // Rotación de la figura en grados
 
+    //Atributos para el texto
+    text?: string; // Texto a mostrar
+    fontSize: number; // Tamaño de la fuente
+    fontFamily: string; // Fuente utilizada
+
     // Constructor para inicializar los atributos
     constructor(params: {
         id?: string, // ID opcional, se genera automáticamente si no se proporciona
@@ -24,7 +29,10 @@ export class ShapeAttributes {
         stroke?: string, // Color del borde inicial (opcional)
         strokeWidth?: number, // Grosor del borde inicial (opcional)
         draggable?: boolean, // Si es arrastrable o no (opcional)
-        rotation?: number // Rotación inicial (opcional)
+        rotation?: number, // Rotación inicial (opcional)
+        text?: string, // Añadir propiedad de texto
+        fontSize?: number, // Tamaño de la fuente inicial (opcional)
+        fontFamily?: string, // Fuente inicial (opcional)
     }) {
         this.id = params.id || `shape-${Date.now()}`; // Genera un ID único si no se proporciona
         this.type = params.type; // Asigna el tipo de figura
@@ -32,11 +40,16 @@ export class ShapeAttributes {
         this.y = params.y || 100; // Posición Y por defecto: 100
         this.width = params.width || 100; // Ancho por defecto: 100
         this.height = params.height || 100; // Alto por defecto: 100
-        this.fill = params.fill || "#DD9D9D"; // Color de relleno por defecto
+        this.fill = params.fill || "#FFFF00"; // Color de relleno por defecto
         this.stroke = params.stroke || "#000000"; // Color del borde por defecto
         this.strokeWidth = params.strokeWidth || 0; // Grosor del borde por defecto: 0
         this.draggable = params.draggable !== undefined ? params.draggable : true; // Arrastrable por defecto: true
         this.rotation = params.rotation || 0; // Rotación por defecto: 0 grados
+
+        this.text = params.text || "Doble clic para editar"; // Texto por defecto
+        this.text = params.text || "";
+        this.fontSize = params.fontSize || 24; // Tamaño de la fuente por defecto
+        this.fontFamily = params.fontFamily || "Arial"; // Fuente por defecto
     }
 
     // Método para escalar la figura
@@ -81,6 +94,11 @@ export class ShapeAttributes {
             strokeWidth: newAttrs.strokeWidth ?? this.strokeWidth, // Mantiene el grosor del borde actual si no se proporciona uno nuevo
             draggable: newAttrs.draggable ?? this.draggable, // Mantiene la propiedad de arrastrable actual si no se proporciona una nueva
             rotation: newAttrs.rotation ?? this.rotation, // Mantiene la rotación actual si no se proporciona una nueva
+
+            text: newAttrs.text ?? this.text,
+            fontSize: newAttrs.fontSize ?? this.fontSize,
+            fontFamily: newAttrs.fontFamily ?? this.fontFamily,
+
         });
     }
 }

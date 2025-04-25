@@ -16,7 +16,7 @@ export const createShape = (type: string): ShapeAttributes => {
     y: 100, // Posición Y inicial
     width: 100, // Ancho inicial
     height: 100, // Alto inicial
-    fill: "#DD9D9D", // Color de relleno por defecto
+    fill: "#D9D9D9", // Color de relleno por defecto
     stroke: "#000000", // Color del borde por defecto
     strokeWidth: 0, // Grosor del borde por defecto
     draggable: true, // Indica si la figura es arrastrable
@@ -35,7 +35,7 @@ export const createShape = (type: string): ShapeAttributes => {
       // Crea una estrella con un color de relleno amarillo
       return new ShapeAttributes({
         ...baseAttrs, // Copia los atributos base
-        fill: "#FFD700" // Cambia el color de relleno a amarillo
+        fill: "#D9D9D9" // Cambia el color de relleno a amarillo
       });
     case "line":
       // Crea una línea con un grosor de borde específico y sin relleno
@@ -44,6 +44,16 @@ export const createShape = (type: string): ShapeAttributes => {
         strokeWidth: 2, // Grosor del borde
         fill: "transparent" // Sin color de relleno
       });
+
+    case "triangle":
+      return new ShapeAttributes({
+        ...baseAttrs,
+        fill: "#FFFF00", // Color de relleno amarillo por defecto
+        width: 100, // Base del triángulo
+        height: 100, // Altura del triángulo
+        rotation: 0, // Sin rotación por defecto
+      });
+
     default:
       // Si no se especifica un tipo válido, devuelve una figura con los atributos base
       return new ShapeAttributes(baseAttrs);

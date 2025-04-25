@@ -21,12 +21,118 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
   };
 
   return (
-    <div className="p-4 bg-gris-semi-oscuro  h-full">
-      <h2 className="text-lg font-semibold mb-4">Detalles de la Figura</h2>
-      
+
+
+
+    <div className="p-4 bg-gris-semi-oscuro  h-full overflow-y-scroll">
+      {selectedShape.type === 'text' && (
+        <div className="mb-4">
+          <label className="block text-sm text-white font-medium mb-1">Tamaño de la Fuente</label>
+          <input
+            type="number"
+            value={selectedShape.fontSize || 24}
+            onChange={(e) => handleChange('fontSize', Number(e.target.value))}
+            className="w-full px-3 py-2 border rounded"
+            min="1"
+          />
+        </div>
+      )}
+
+
+      {selectedShape.type === 'text' && (
+        <div className="mb-4">
+          <label className="block text-sm text-white font-medium mb-1">Fuente</label>
+          <select
+            value={selectedShape.fontFamily || 'Arial'}
+            onChange={(e) => handleChange('fontFamily', e.target.value)}
+            className="w-full px-3 py-2 border rounded"
+          >
+            <option value="Arial">Arial</option>
+            <option value="Helvetica">Helvetica</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Georgia">Georgia</option>
+          </select>
+        </div>
+      )}
+
+
+      {selectedShape.type === 'text' && (
+        <div className="mb-4">
+          <label className="block text-sm text-white font-medium mb-1">Texto</label>
+          <textarea
+            value={selectedShape.text || ''}
+            onChange={(e) => handleChange('text', e.target.value)}
+            className="w-full px-3 py-2 border rounded"
+            rows={3}
+          />
+        </div>
+      )}
+
+
+      <div className="mb-4">
+        <label className="block text-white text-sm font-medium mb-1">Tamaño de la Fuente</label>
+        <input
+          type="number"
+          value={selectedShape.fontSize}
+          onChange={(e) => handleChange('fontSize', Number(e.target.value))}
+          className="w-full px-3 py-2 border rounded"
+          min="1"
+        />
+      </div>
+
+
+      <div className="mb-4">
+        <label className="block text-sm text-white font-medium mb-1">Fuente</label>
+        <input
+          type="text"
+          value={selectedShape.fontFamily}
+          onChange={(e) => handleChange('fontFamily', e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+        />
+      </div>
+
+
+      <div className="mb-4">
+        <label className="block text-sm text-white font-medium mb-1">Color del Texto</label>
+        <input
+          type="color"
+          value={selectedShape.fill}
+          onChange={(e) => handleChange('fill', e.target.value)}
+          className="w-full h-10"
+        />
+      </div>
+
+
+      <div className="mb-4">
+        <label className="block text-sm text-white font-medium mb-1">Color del Borde</label>
+        <input
+          type="color"
+          value={selectedShape.stroke}
+          onChange={(e) => handleChange('stroke', e.target.value)}
+          className="w-full h-10"
+        />
+      </div>
+
+
+      <div className="mb-4">
+        <label className="block text-sm text-white font-medium mb-1">Grosor del Borde</label>
+        <input
+          type="number"
+          value={selectedShape.strokeWidth}
+          onChange={(e) => handleChange('strokeWidth', Number(e.target.value))}
+          className="w-full px-3 py-2 border rounded"
+          min="0"
+        />
+      </div>
+
+
+      <h2 className="text-lg text-white font-semibold mb-4">Detalles de la Figura</h2>
+
       {/* Tipo de figura */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Tipo</label>
+        <label className="block text-sm text-white font-medium mb-1">Tipo</label>
         <input
           type="text"
           value={selectedShape.type}
@@ -37,7 +143,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
 
       {/* Posición X */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Posición X</label>
+        <label className="block text-sm text-white font-medium mb-1">Posición X</label>
         <input
           type="number"
           value={selectedShape.x}
@@ -48,7 +154,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
 
       {/* Posición Y */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Posición Y</label>
+        <label className="block text-sm text-white font-medium mb-1">Posición Y</label>
         <input
           type="number"
           value={selectedShape.y}
@@ -59,7 +165,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
 
       {/* Ancho */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Ancho</label>
+        <label className="block text-sm text-white font-medium mb-1">Ancho</label>
         <input
           type="number"
           value={selectedShape.width}
@@ -70,7 +176,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
 
       {/* Alto */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Alto</label>
+        <label className="block text-sm text-white font-medium mb-1">Alto</label>
         <input
           type="number"
           value={selectedShape.height}
@@ -81,7 +187,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
 
       {/* Color de relleno */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Color de relleno</label>
+        <label className="block text-sm text-white font-medium mb-1">Color de relleno</label>
         <input
           type="color"
           value={selectedShape.fill}
@@ -92,7 +198,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
 
       {/* Color del borde */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Color del borde</label>
+        <label className="block text-sm text-white font-medium mb-1">Color del borde</label>
         <input
           type="color"
           value={selectedShape.stroke}
@@ -103,7 +209,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
 
       {/* Grosor del borde */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Grosor del borde</label>
+        <label className="block text-sm text-white font-medium mb-1">Grosor del borde</label>
         <input
           type="number"
           value={selectedShape.strokeWidth}
@@ -115,7 +221,7 @@ const SidebarDetalles: React.FC<SidebarDetallesProps> = ({ selectedShape, onUpda
 
       {/* Rotación */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Rotación</label>
+        <label className="block text-sm text-white font-medium mb-1">Rotación</label>
         <input
           type="number"
           value={selectedShape.rotation}

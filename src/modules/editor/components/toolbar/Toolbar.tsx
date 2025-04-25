@@ -1,7 +1,9 @@
-import React from 'react';
-import { 
-  Square, 
-  Circle, 
+import { TfiText } from "react-icons/tfi";
+import { IoTriangleOutline } from "react-icons/io5";
+
+import {
+  Square,
+  Circle,
   Star,
   Minus,
   Trash2,
@@ -18,7 +20,7 @@ interface ToolbarProps {
   onRotateShape?: () => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ 
+const Toolbar: React.FC<ToolbarProps> = ({
   onAddShape,
   selectedId,
   onDeleteShape,
@@ -32,37 +34,55 @@ const Toolbar: React.FC<ToolbarProps> = ({
     <div className="border-t border-gray-200 bg-gris-semi-oscuro  p-2 flex items-center justify-between sticky bottom-0 w-full">
       {/* Herramientas de creación de figuras */}
       <div className="flex items-center space-x-2">
-        <button 
-          className="p-2 rounded hover:bg-gray-100"
+        <button
+          className="p-2 rounded text-white hover:bg-gray-100 hover:text-black"
           onClick={() => onAddShape('rectangle')}
           title="Añadir Rectángulo"
         >
           <Square size={20} />
         </button>
-        
-        <button 
-          className="p-2 rounded hover:bg-gray-100"
+
+        <button
+          className="p-2 rounded text-white hover:bg-gray-100 hover:text-black"
           onClick={() => onAddShape('circle')}
           title="Añadir Círculo"
         >
           <Circle size={20} />
         </button>
-        
-        <button 
-          className="p-2 rounded hover:bg-gray-100"
+
+        <button
+          className="p-2 rounded text-white hover:bg-gray-100 hover:text-black"
           onClick={() => onAddShape('star')}
           title="Añadir Estrella"
         >
           <Star size={20} />
         </button>
-        
-        <button 
+
+        {/* triangulo */}
+        <button
           className="p-2 rounded hover:bg-gray-100"
-          onClick={() => onAddShape('line')}
-          title="Añadir Línea"
+          onClick={() => onAddShape('triangle')} // Llamar a la función onAddShape con 'triangle' como tipo
+          title="Añadir Triángulo"
         >
-          <Minus size={20} />
+          <IoTriangleOutline className="text-white"/>
         </button>
+
+          <button
+            className="p-2 rounded text-white hover:bg-gray-100 hover:text-black"
+            onClick={() => onAddShape('line')}
+            title="Añadir Línea"
+          >
+            <Minus size={20} />
+          </button>
+
+          <button
+            className="p-2 rounded text-white hover:bg-gray-100 "
+
+            onClick={() => onAddShape('text')}
+            title="Añadir Texto"
+          >
+            <TfiText className="text-white font-bold" />
+          </button>
       </div>
 
       {/* Herramientas de edición */}
@@ -70,17 +90,17 @@ const Toolbar: React.FC<ToolbarProps> = ({
         {hasSelection && (
           <>
             {onDeleteShape && (
-              <button 
-                className="p-2 rounded hover:bg-gray-100 text-red-500"
+              <button
+                className="p-2 rounded  hover:bg-gray-100 text-red-500"
                 onClick={onDeleteShape}
                 title="Eliminar"
               >
                 <Trash2 size={20} />
               </button>
             )}
-            
+
             {onDuplicateShape && (
-              <button 
+              <button
                 className="p-2 rounded hover:bg-gray-100"
                 onClick={onDuplicateShape}
                 title="Duplicar"
@@ -88,9 +108,9 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 <Copy size={20} />
               </button>
             )}
-            
+
             {onRotateShape && (
-              <button 
+              <button
                 className="p-2 rounded hover:bg-gray-100"
                 onClick={onRotateShape}
                 title="Rotar"

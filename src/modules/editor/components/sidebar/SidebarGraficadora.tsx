@@ -7,11 +7,11 @@ interface SidebarGraficadoraProps {
 // Define el componente con sus props tipadas
 const SidebarGraficadora: React.FC<SidebarGraficadoraProps> = ({ onToolSelect }) => {
   return (
-    <div className="p-4 bg-gris-semi-oscuro h-full">
-      <h2 className="text-xl font-bold text-white mb-4">Herramientas</h2>
+    <div className="p-4 bg-gris-semi-oscuro h-full" >
+      <h2 className="text-xl font-bold text-white mb-4">Nombre del Proyecto</h2>
       
       {/* Botones para las diferentes herramientas */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <button
           className="w-full p-2 bg-gray-700 text-white rounded hover:bg-gray-600"
           onClick={() => onToolSelect('rectangle')}
@@ -39,7 +39,7 @@ const SidebarGraficadora: React.FC<SidebarGraficadoraProps> = ({ onToolSelect })
         >
           Línea
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };
