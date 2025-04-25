@@ -16,49 +16,60 @@ export const useShapes = () => {
 
   const [isTextMode, setIsTextMode] = useState(false);
 
-  // Función para agregar una nueva figura al lienzo
-// Modificar addShape para manejar el triángulo
-const addShape = (type: string, x: number, y: number) => {
-  if (type === "text") {
-    const newShape = new ShapeAttributes({
-      type: "text",
-      x: x,
-      y: y,
-      fill: "#FFFF00", // Amarillo por defecto
-      stroke: "",
-      strokeWidth: 0,
-      width: 200,
-      height: 50,
-      draggable: true,
-      rotation: 0,
-      fontSize: 24,
-      fontFamily: "Arial",
-    });
-    setShapes([...shapes, newShape]);
-    setSelectedId(newShape.id);
-  } else if (type === "triangle") {
-    // Crear un triángulo con los atributos por defecto
-    const newShape = new ShapeAttributes({
-      type: "triangle",
-      x: x,
-      y: y,
-      fill: "#FFFF00", // Amarillo por defecto
-      stroke: "#000", // Bordes negros
-      strokeWidth: 2, // Grosor del borde
-      width: 100, // Base del triángulo
-      height: 100, // Altura del triángulo
-      draggable: true,
-      rotation: 0,
-    });
-    setShapes([...shapes, newShape]);
-    setSelectedId(newShape.id);
-  } else {
-    // Crear otras figuras como círculo, cuadrado, etc.
-    const newShape = createShape(type);
-    setShapes([...shapes, newShape]);
-    setSelectedId(newShape.id);
-  }
-};
+
+
+
+ // Función para agregar una nueva figura al lienzo
+  // Modificar addShape para manejar el triángulo
+  const addShape = (type: string, x: number = 100, y: number = 100) => {
+    if (type === "text") {
+      const newShape = new ShapeAttributes({
+        type: "text",
+        x: x,
+        y: y,
+        fill: "#FFFF00", // Amarillo por defecto
+        stroke: "",
+        strokeWidth: 0,
+        width: 200,
+        height: 50,
+        draggable: true,
+        rotation: 0,
+        fontSize: 24,
+        fontFamily: "Arial",
+        zIndex: shapes.length, // Asignar el índice de capa
+      });
+      setShapes([...shapes, newShape]);
+      setSelectedId(newShape.id);
+    } else if (type === "triangle") {
+      // Crear un triángulo con los atributos por defecto
+      const newShape = new ShapeAttributes({
+        type: "triangle",
+        x: x,
+        y: y,
+        fill: "#FFFF00", // Amarillo por defecto
+        stroke: "#000", // Bordes negros
+        strokeWidth: 2, // Grosor del borde
+        width: 100, // Base del triángulo
+        height: 100, // Altura del triángulo
+        draggable: true,
+        rotation: 0,
+        zIndex: shapes.length, // Asignar el índice de capa
+      });
+      setShapes([...shapes, newShape]);
+      setSelectedId(newShape.id);
+    } else {
+      // Crear otras figuras como círculo, cuadrado, etc.
+      const newShape = createShape(type);
+      // Asignar la posición específica si se proporciona
+      newShape.x = x;
+      newShape.y = y;
+      newShape.zIndex = shapes.length; // Asignar el índice de capa
+      setShapes([...shapes, newShape]);
+      setSelectedId(newShape.id);
+    }
+  };
+
+
 
 
   // Función para actualizar los atributos de una figura existente
@@ -83,15 +94,33 @@ const addShape = (type: string, x: number, y: number) => {
     setSelectedId(null); // Establece el ID seleccionado como `null`
   };
 
+
+
   // Función para eliminar una figura del lienzo
+
   const deleteShape = (id: string) => {
-    setShapes(shapes.filter(shape => shape.id !== id)); // Elimina la figura con el ID especificado
+    // Encontrar la figura para verificar si es un grupo
+    const shapeToDelete = shapes.find(shape => shape.id === id);
+
+    if (shapeToDelete && shapeToDelete.type === 'group' && shapeToDelete.children) {
+      // Si es un grupo, eliminar el grupo pero conservar sus hijos
+      const childrenShapes = shapeToDelete.children;
+      const remainingShapes = shapes.filter(shape => shape.id !== id);
+      setShapes([...remainingShapes, ...childrenShapes]);
+    } else {
+      // Si no es un grupo, eliminar normalmente
+      setShapes(shapes.filter(shape => shape.id !== id));
+    }
+
     if (selectedId === id) {
       setSelectedId(null); // Deselecciona la figura si era la seleccionada
     }
   };
 
+
+
   // Función para actualizar el texto de una forma
+
   const updateText = (id: string, newText: string) => {
     setShapes(
       shapes.map((shape) => {
@@ -101,6 +130,111 @@ const addShape = (type: string, x: number, y: number) => {
         return shape;
       })
     );
+  };
+
+
+  // Función para mover una figura hacia adelante (una capa)
+  const moveForward = (id: string) => {
+    const shapeIndex = shapes.findIndex(shape => shape.id === id);
+    if (shapeIndex < shapes.length - 1) {
+      const newShapes = [...shapes];
+
+      // Intercambiar posiciones
+      [newShapes[shapeIndex], newShapes[shapeIndex + 1]] =
+        [newShapes[shapeIndex + 1], newShapes[shapeIndex]];
+
+      // Actualizar zIndex
+      newShapes[shapeIndex].zIndex = shapeIndex;
+      newShapes[shapeIndex + 1].zIndex = shapeIndex + 1;
+
+      setShapes(newShapes);
+    }
+  };
+
+  // Función para mover una figura hacia atrás (una capa)
+  const moveBackward = (id: string) => {
+    const shapeIndex = shapes.findIndex(shape => shape.id === id);
+    if (shapeIndex > 0) {
+      const newShapes = [...shapes];
+
+      // Intercambiar posiciones
+      [newShapes[shapeIndex], newShapes[shapeIndex - 1]] =
+        [newShapes[shapeIndex - 1], newShapes[shapeIndex]];
+
+      // Actualizar zIndex
+      newShapes[shapeIndex].zIndex = shapeIndex;
+      newShapes[shapeIndex - 1].zIndex = shapeIndex - 1;
+
+      setShapes(newShapes);
+    }
+  };
+
+
+  // Función para agrupar figuras
+  const groupShapes = (ids: string[]) => {
+    if (ids.length < 2) return; // Se necesitan al menos 2 figuras para agrupar
+
+    // Obtener las figuras que se van a agrupar
+    const shapesToGroup = shapes.filter(shape => ids.includes(shape.id));
+    const otherShapes = shapes.filter(shape => !ids.includes(shape.id));
+
+    // Calcular las dimensiones del grupo
+    let minX = Math.min(...shapesToGroup.map(s => s.x));
+    let minY = Math.min(...shapesToGroup.map(s => s.y));
+    let maxX = Math.max(...shapesToGroup.map(s => s.x + s.width));
+    let maxY = Math.max(...shapesToGroup.map(s => s.y + s.height));
+
+    // Crear un nuevo grupo
+    const groupId = `group-${Date.now()}`;
+    const newGroup = new ShapeAttributes({
+      id: groupId,
+      type: 'group',
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+      fill: 'transparent',
+      stroke: '#00A0FF',
+      strokeWidth: 1,
+      draggable: true,
+      rotation: 0,
+      // Ajustar las posiciones relativas de los hijos
+      children: shapesToGroup.map(shape => {
+        return shape.cloneWith({
+          x: shape.x - minX,  // Posición relativa al grupo
+          y: shape.y - minY   // Posición relativa al grupo
+        });
+      }),
+      zIndex: shapes.length // El grupo siempre va encima
+    });
+
+    // Actualizar el estado con el nuevo grupo
+    setShapes([...otherShapes, newGroup]);
+    setSelectedId(groupId);
+  };
+
+
+  // Función para desagrupar figuras
+  const ungroupShapes = (groupId: string) => {
+    const group = shapes.find(shape => shape.id === groupId);
+    if (!group || group.type !== 'group' || !group.children || group.children.length === 0) return;
+
+    // Obtener las figuras del grupo y ajustar sus posiciones absolutas
+    const childrenWithAbsolutePositions = group.children.map(child => {
+      return child.cloneWith({
+        x: group.x + child.x,  // Convertir a posición absoluta
+        y: group.y + child.y   // Convertir a posición absoluta
+      });
+    });
+
+    // Filtrar el grupo actual y añadir sus hijos como figuras independientes
+    const otherShapes = shapes.filter(shape => shape.id !== groupId);
+    setShapes([...otherShapes, ...childrenWithAbsolutePositions]);
+
+    // Deseleccionar el grupo eliminado
+    if (selectedId === groupId) {
+      setSelectedId(null);
+    }
   };
 
 
@@ -123,7 +257,6 @@ const addShape = (type: string, x: number, y: number) => {
   };
 
 
-
   // Devuelve las funciones y estados para manejar las figuras
   return {
     shapes, // Lista de figuras
@@ -135,7 +268,11 @@ const addShape = (type: string, x: number, y: number) => {
     selectShape, // Función para seleccionar una figura
     deselectShape, // Función para deseleccionar figuras
     deleteShape, // Función para eliminar una figura
-    handleCanvasClick
+    moveForward, // Función para mover una figura hacia adelante
+    moveBackward, // Función para mover una figura hacia atrás
+    groupShapes, // Función para agrupar figuras
+    ungroupShapes,
+    handleCanvasClick,
 
   };
 };

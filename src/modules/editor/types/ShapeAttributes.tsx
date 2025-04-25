@@ -16,6 +16,10 @@ export class ShapeAttributes {
     text?: string; // Texto a mostrar
     fontSize: number; // Tamaño de la fuente
     fontFamily: string; // Fuente utilizada
+    
+    // Atributos para grupos
+    children?: ShapeAttributes[]; // Figuras hijas cuando es un grupo
+    zIndex?: number; // Índice de capa para control de orden
 
     // Constructor para inicializar los atributos
     constructor(params: {
@@ -33,6 +37,8 @@ export class ShapeAttributes {
         text?: string, // Añadir propiedad de texto
         fontSize?: number, // Tamaño de la fuente inicial (opcional)
         fontFamily?: string, // Fuente inicial (opcional)
+        children?: ShapeAttributes[], // Figuras hijas para grupos
+        zIndex?: number, // Orden de capa
     }) {
         this.id = params.id || `shape-${Date.now()}`; // Genera un ID único si no se proporciona
         this.type = params.type; // Asigna el tipo de figura
@@ -46,10 +52,13 @@ export class ShapeAttributes {
         this.draggable = params.draggable !== undefined ? params.draggable : true; // Arrastrable por defecto: true
         this.rotation = params.rotation || 0; // Rotación por defecto: 0 grados
 
-        this.text = params.text || "Doble clic para editar"; // Texto por defecto
-        this.text = params.text || "";
+        this.text = params.text || ""; // Texto por defecto vacío
         this.fontSize = params.fontSize || 24; // Tamaño de la fuente por defecto
         this.fontFamily = params.fontFamily || "Arial"; // Fuente por defecto
+        
+        // Para grupos
+        this.children = params.children || []; // Lista vacía por defecto
+        this.zIndex = params.zIndex || 0; // Orden 0 por defecto
     }
 
     // Método para escalar la figura
@@ -94,11 +103,11 @@ export class ShapeAttributes {
             strokeWidth: newAttrs.strokeWidth ?? this.strokeWidth, // Mantiene el grosor del borde actual si no se proporciona uno nuevo
             draggable: newAttrs.draggable ?? this.draggable, // Mantiene la propiedad de arrastrable actual si no se proporciona una nueva
             rotation: newAttrs.rotation ?? this.rotation, // Mantiene la rotación actual si no se proporciona una nueva
-
             text: newAttrs.text ?? this.text,
             fontSize: newAttrs.fontSize ?? this.fontSize,
             fontFamily: newAttrs.fontFamily ?? this.fontFamily,
-
+            children: newAttrs.children ?? this.children,
+            zIndex: newAttrs.zIndex ?? this.zIndex,
         });
     }
 }
