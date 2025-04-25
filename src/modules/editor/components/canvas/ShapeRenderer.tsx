@@ -6,9 +6,9 @@ import Konva from "konva";
 interface ShapeRendererProps {
   shape: ShapeAttributes;
   isSelected: boolean;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, isMultiSelect?: boolean) => void;
   onUpdate: (id: string, attrs: Partial<ShapeAttributes>) => void;
-  handleStageClick: (e: any) => void; // Asegúrate de recibir el prop
+  handleStageClick: (e: any) => void;
 }
 
 const ShapeRenderer: React.FC<ShapeRendererProps> = ({
@@ -23,6 +23,11 @@ const ShapeRenderer: React.FC<ShapeRendererProps> = ({
       x: e.target.x(),
       y: e.target.y()
     });
+  };
+
+  // evento onClick para pasar el evento al handler:
+  const handleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    onSelect(shape.id, e.evt.ctrlKey || e.evt.shiftKey);
   };
 
   const handleTransformEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -48,8 +53,11 @@ const ShapeRenderer: React.FC<ShapeRendererProps> = ({
     strokeWidth: shape.strokeWidth,
     draggable: shape.draggable,
     rotation: shape.rotation,
-    onClick: () => onSelect(shape.id),
-    onTap: () => onSelect(shape.id),
+    onClick: handleClick, 
+    //--------------TENBER EN CUENTA ESTO
+    //onTap: () => onSelect(shape.id),
+    onTap: handleClick, 
+    //---------------------------------
     onDragEnd: handleDragEnd,
     onTransformEnd: handleTransformEnd,
   };

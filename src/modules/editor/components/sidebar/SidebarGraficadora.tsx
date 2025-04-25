@@ -32,7 +32,7 @@ interface SidebarGraficadoraProps {
 
 const SidebarGraficadora: React.FC<SidebarGraficadoraProps> = ({
   onToolSelect,
-  shapes,
+  shapes = [], // Valor por defecto para evitar undefined
   selectedId,
   onSelectShape,
   onDeleteShape,
@@ -99,20 +99,24 @@ const SidebarGraficadora: React.FC<SidebarGraficadoraProps> = ({
   };
 
   // Render recursivo para las figuras y grupos
-  const renderShapeList = (shapeList: ShapeAttributes[], isInGroup = false) => {
+  const renderShapeList = (shapeList: ShapeAttributes[] = [], isInGroup = false) => {
+    if (!shapeList || !Array.isArray(shapeList)) {
+      return null; // Retornar null si shapeList es undefined o no es un array
+    }
+    
     return shapeList.map((shape) => {
       const isSelected = selectedId === shape.id || selectedShapeIds.includes(shape.id);
       const isGroup = shape.type === 'group';
       const isExpanded = expandedGroups.has(shape.id);
-
+  
       return (
         <div key={shape.id} className={`pl-${isInGroup ? '4' : '0'}`}>
-          <div 
+          <div
             className={`flex items-center p-2 ${isSelected ? 'bg-blue-500 text-white' : 'hover:bg-gray-700'} rounded cursor-pointer`}
             onClick={(e) => handleShapeSelect(shape.id, e)}
           >
             {isGroup && (
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleGroup(shape.id);
@@ -164,7 +168,7 @@ const SidebarGraficadora: React.FC<SidebarGraficadoraProps> = ({
             </div>
           </div>
           
-          {isGroup && isExpanded && shape.children && (
+          {isGroup && isExpanded && shape.children && Array.isArray(shape.children) && shape.children.length > 0 && (
             <div className="ml-4 border-l border-gray-600">
               {renderShapeList(shape.children, true)}
             </div>
@@ -173,7 +177,7 @@ const SidebarGraficadora: React.FC<SidebarGraficadoraProps> = ({
       );
     });
   };
-
+  
   return (
     <div className="p-4 bg-gris-semi-oscuro h-full flex flex-col">
       <h2 className="text-xl font-bold text-white mb-4">Nombre del Proyecto</h2>
@@ -266,7 +270,7 @@ const SidebarGraficadora: React.FC<SidebarGraficadoraProps> = ({
                 }
               }
             }}
-            disabled={!selectedId || !shapes.find(s => s.id === selectedId)?.type === 'group'}
+            disabled={!selectedId || shapes.find(s => s.id === selectedId)?.type !== 'group'}
             title="Desagrupar"
           >
             <Ungroup size={16} />
@@ -279,12 +283,10 @@ const SidebarGraficadora: React.FC<SidebarGraficadoraProps> = ({
       <div className="flex-1 overflow-y-auto">
         <h3 className="text-white text-sm font-medium mb-2">Capas</h3>
         <div className="space-y-1">
-          {renderShapeList(shapes)}
+          {shapes && shapes.length > 0 ? renderShapeList(shapes) : (
+            <p className="text-gray-400 text-sm">No hay figuras en el lienzo</p>
+          )}
         </div>
-        
-        {shapes.length === 0 && (
-          <p className="text-gray-400 text-sm">No hay figuras en el lienzo</p>
-        )}
       </div>
     </div>
   );

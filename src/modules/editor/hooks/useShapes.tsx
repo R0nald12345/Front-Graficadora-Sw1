@@ -16,10 +16,11 @@ export const useShapes = () => {
 
   const [isTextMode, setIsTextMode] = useState(false);
 
+  //nuevo estado para guardar múltiples IDs seleccionados
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
 
-
- // Función para agregar una nueva figura al lienzo
+  // Función para agregar una nueva figura al lienzo
   // Modificar addShape para manejar el triángulo
   const addShape = (type: string, x: number = 100, y: number = 100) => {
     if (type === "text") {
@@ -40,6 +41,7 @@ export const useShapes = () => {
       });
       setShapes([...shapes, newShape]);
       setSelectedId(newShape.id);
+      setSelectedIds([newShape.id]); // Actualizar también selectedIds
     } else if (type === "triangle") {
       // Crear un triángulo con los atributos por defecto
       const newShape = new ShapeAttributes({
@@ -57,6 +59,7 @@ export const useShapes = () => {
       });
       setShapes([...shapes, newShape]);
       setSelectedId(newShape.id);
+      setSelectedIds([newShape.id]); // Actualizar también selectedIds
     } else {
       // Crear otras figuras como círculo, cuadrado, etc.
       const newShape = createShape(type);
@@ -66,11 +69,9 @@ export const useShapes = () => {
       newShape.zIndex = shapes.length; // Asignar el índice de capa
       setShapes([...shapes, newShape]);
       setSelectedId(newShape.id);
+      setSelectedIds([newShape.id]); // Actualizar también selectedIds
     }
   };
-
-
-
 
   // Función para actualizar los atributos de una figura existente
   const updateShape = (id: string, newAttrs: Partial<ShapeAttributes>) => {
@@ -84,20 +85,56 @@ export const useShapes = () => {
     );
   };
 
-  // Función para seleccionar una figura (por su ID)
-  const selectShape = (id: string) => {
-    setSelectedId(id); // Establece el ID de la figura seleccionada
+  // Modifica la función selectShape para manejar la selección múltiple
+  const selectShape = (id: string, isMultiSelect: boolean = false) => {
+    if (isMultiSelect) {
+      // Si es selección múltiple (con Ctrl/Shift)
+      setSelectedIds(prevIds => {
+        if (prevIds.includes(id)) {
+          // Si ya está seleccionado, lo quitamos
+          return prevIds.filter(shapeId => shapeId !== id);
+        } else {
+          // Si no está seleccionado, lo añadimos
+          return [...prevIds, id];
+        }
+      });
+    } else {
+      // Si es selección simple, solo seleccionamos esta figura
+      setSelectedId(id);
+      setSelectedIds([id]);
+    }
   };
 
   // Función para deseleccionar cualquier figura
   const deselectShape = () => {
-    setSelectedId(null); // Establece el ID seleccionado como `null`
+    setSelectedId(null);
+    setSelectedIds([]);
   };
 
-
+  // Añade esta función para la selección por arrastre (área)
+  const selectShapesInArea = (x1: number, y1: number, x2: number, y2: number) => {
+    const selectedShapes = shapes.filter(shape => {
+      // Comprueba si la figura está dentro del área seleccionada
+      return (
+        shape.x >= Math.min(x1, x2) &&
+        shape.x + shape.width <= Math.max(x1, x2) &&
+        shape.y >= Math.min(y1, y2) &&
+        shape.y + shape.height <= Math.max(y1, y2)
+      );
+    });
+    
+    const ids = selectedShapes.map(shape => shape.id);
+    setSelectedIds(ids);
+    if (ids.length === 1) {
+      setSelectedId(ids[0]);
+    } else {
+      setSelectedId(null); // No hay una única selección activa
+    }
+    
+    return ids;
+  };
 
   // Función para eliminar una figura del lienzo
-
   const deleteShape = (id: string) => {
     // Encontrar la figura para verificar si es un grupo
     const shapeToDelete = shapes.find(shape => shape.id === id);
@@ -114,13 +151,11 @@ export const useShapes = () => {
 
     if (selectedId === id) {
       setSelectedId(null); // Deselecciona la figura si era la seleccionada
+      setSelectedIds([]); // Limpiar también selectedIds
     }
   };
 
-
-
   // Función para actualizar el texto de una forma
-
   const updateText = (id: string, newText: string) => {
     setShapes(
       shapes.map((shape) => {
@@ -131,7 +166,6 @@ export const useShapes = () => {
       })
     );
   };
-
 
   // Función para mover una figura hacia adelante (una capa)
   const moveForward = (id: string) => {
@@ -169,7 +203,6 @@ export const useShapes = () => {
     }
   };
 
-
   // Función para agrupar figuras
   const groupShapes = (ids: string[]) => {
     if (ids.length < 2) return; // Se necesitan al menos 2 figuras para agrupar
@@ -199,20 +232,20 @@ export const useShapes = () => {
       draggable: true,
       rotation: 0,
       // Ajustar las posiciones relativas de los hijos
-      children: shapesToGroup.map(shape => {
+      children: shapesToGroup.length > 0 ? shapesToGroup.map(shape => {
         return shape.cloneWith({
           x: shape.x - minX,  // Posición relativa al grupo
           y: shape.y - minY   // Posición relativa al grupo
         });
-      }),
+      }) : [],  // Aseguramos que children sea un array vacío si no hay hijos
       zIndex: shapes.length // El grupo siempre va encima
     });
 
     // Actualizar el estado con el nuevo grupo
     setShapes([...otherShapes, newGroup]);
     setSelectedId(groupId);
+    setSelectedIds([groupId]); // Actualizar también selectedIds
   };
-
 
   // Función para desagrupar figuras
   const ungroupShapes = (groupId: string) => {
@@ -234,9 +267,9 @@ export const useShapes = () => {
     // Deseleccionar el grupo eliminado
     if (selectedId === groupId) {
       setSelectedId(null);
+      setSelectedIds([]); // Limpiar también selectedIds
     }
   };
-
 
   // Añade estas funciones para el manejo del clic en el canvas
   const handleCanvasClick = (e: any) => {
@@ -256,7 +289,6 @@ export const useShapes = () => {
     }
   };
 
-
   // Devuelve las funciones y estados para manejar las figuras
   return {
     shapes, // Lista de figuras
@@ -271,8 +303,9 @@ export const useShapes = () => {
     moveForward, // Función para mover una figura hacia adelante
     moveBackward, // Función para mover una figura hacia atrás
     groupShapes, // Función para agrupar figuras
-    ungroupShapes,
-    handleCanvasClick,
-
+    ungroupShapes, // Función para desagrupar (asegúrate de que esté expuesta)
+    handleCanvasClick, // Manejador de clics en el lienzo
+    selectedIds, // Lista de IDs seleccionados
+    selectShapesInArea, // Función para seleccionar figuras en un área
   };
 };
