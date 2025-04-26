@@ -12,6 +12,9 @@ export class ShapeAttributes {
     draggable: boolean; // Indica si la figura es arrastrable
     rotation: number; // Rotación de la figura en grados
 
+    image?: HTMLImageElement; // La imagen cargada
+    src?: string; // La URL o datos base64 de la imagen
+
     //Atributos para el texto
     text?: string; // Texto a mostrar
     fontSize: number; // Tamaño de la fuente
@@ -39,6 +42,10 @@ export class ShapeAttributes {
         fontFamily?: string, // Fuente inicial (opcional)
         children?: ShapeAttributes[], // Figuras hijas para grupos
         zIndex?: number, // Orden de capa
+
+         // Añadir estos parámetros opcionales
+         image?: HTMLImageElement,
+         src?: string,
     }) {
         this.id = params.id || `shape-${Date.now()}`; // Genera un ID único si no se proporciona
         this.type = params.type; // Asigna el tipo de figura
@@ -59,6 +66,9 @@ export class ShapeAttributes {
         // Para grupos
         this.children = params.children || []; // Lista vacía por defecto
         this.zIndex = params.zIndex || 0; // Orden 0 por defecto
+
+        this.image = params.image;
+        this.src = params.src;
     }
 
     // Método para escalar la figura
@@ -108,6 +118,9 @@ export class ShapeAttributes {
             fontFamily: newAttrs.fontFamily ?? this.fontFamily,
             children: newAttrs.children ?? this.children,
             zIndex: newAttrs.zIndex ?? this.zIndex,
+
+            image: newAttrs.image ?? this.image,
+            src: newAttrs.src ?? this.src,
         });
     }
 }

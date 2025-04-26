@@ -1,6 +1,7 @@
 
 import { TfiText } from "react-icons/tfi";
 import { IoTriangleOutline } from "react-icons/io5";
+import { Image as ImageIcon } from 'lucide-react';
 
 import {
   Square,
@@ -22,6 +23,7 @@ interface ToolbarProps {
   onRotateShape?: () => void;
   onMoveForward?: () => void;
   onMoveBackward?: () => void;
+  onAddImage?: (file: File) => void; // Añade esta prop
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -32,8 +34,17 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onDuplicateShape,
   onRotateShape,
   onMoveForward,
-  onMoveBackward
+  onMoveBackward,
+  onAddImage,
 }) => {
+
+  // Esta función para manejar la selección de archivo
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && onAddImage) {
+      onAddImage(file);
+    }
+  };
 
   // Verifica si hay una figura seleccionada
   const hasSelection = !!selectedId || selectedIds.length > 0;
@@ -42,6 +53,26 @@ const Toolbar: React.FC<ToolbarProps> = ({
     <div className="border-t border-gray-200 bg-gris-semi-oscuro  p-2 flex items-center justify-between sticky bottom-0 w-full">
       {/* Herramientas de creación de figuras */}
       <div className="flex items-center space-x-2">
+
+        {/* para la imagen */}
+        {/* Añade el botón de imagen después de los otros botones */}
+        <div className="relative">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+            id="image-upload"
+          />
+          <label
+            htmlFor="image-upload"
+            className="p-2 rounded text-white hover:bg-gray-100 hover:text-black cursor-pointer flex items-center justify-center"
+            title="Añadir Imagen"
+          >
+            <ImageIcon size={20} />
+          </label>
+        </div>
+
         <button
           className="p-2 rounded text-white hover:bg-gray-100 hover:text-black"
           onClick={() => onAddShape('rectangle')}

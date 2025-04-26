@@ -1,5 +1,5 @@
 import React from "react";
-import { Rect, Circle, Star, Line, Text, Shape } from "react-konva"; // Importamos Shape desde react-konva
+import { Rect, Circle, Star, Line, Text,Image } from "react-konva"; // Importamos Shape desde react-konva
 import { ShapeAttributes } from "../../types/ShapeAttributes";
 import Konva from "konva";
 
@@ -178,6 +178,16 @@ const ShapeRenderer: React.FC<ShapeRendererProps> = ({
           onDblClick={handleTextDblClick} // Llamamos al manejador de doble clic
         />
       );
+
+      case 'image':
+        return (
+          <Image
+            {...shapeProps}
+            image={shape.image}
+            width={shape.width}
+            height={shape.height}
+          />
+        );
     default:
       return null;
   }

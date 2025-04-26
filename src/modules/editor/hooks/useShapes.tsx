@@ -1,12 +1,10 @@
-//Para el manejo y metodos de las formas(mover, actualiar, eliminar, etc.)
 
-import { useState } from 'react'
-import { ShapeAttributes } from '../types/ShapeAttributes'
+// useShapes.tsx (refactorizado)
+import { useState, useCallback } from 'react';
+import { ShapeAttributes } from '../types/ShapeAttributes';
 import { createShape } from '../services/shapeFactory';
+import { useLayering } from './useLayering';
 
-//ME ayuda para hacer las gestiones de mis Figuras
-
-// Hook personalizado para manejar las figuras en el lienzo
 export const useShapes = () => {
   // Estado para almacenar todas las figuras
   const [shapes, setShapes] = useState<ShapeAttributes[]>([]);
@@ -16,19 +14,50 @@ export const useShapes = () => {
 
   const [isTextMode, setIsTextMode] = useState(false);
 
-  //nuevo estado para guardar múltiples IDs seleccionados
+  // Estado para guardar múltiples IDs seleccionados
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  // Importamos las funciones de capas desde el hook useLayering
+  const { moveForward, moveBackward } = useLayering({ shapes, setShapes });
 
   // Función para agregar una nueva figura al lienzo
-  // Modificar addShape para manejar el triángulo
-  const addShape = (type: string, x: number = 100, y: number = 100) => {
+  const addShape = useCallback((
+    type: string,
+    xOrAttrs?: number | Partial<ShapeAttributes>,
+    y: number = 100
+  ) => {
+    // Para imágenes (cuando xOrAttrs es un objeto)
+    if (typeof xOrAttrs === 'object' && xOrAttrs !== null) {
+      if (type === "image") {
+        const attrs = xOrAttrs as Partial<ShapeAttributes>;
+        const newShape = new ShapeAttributes({
+          type: 'image',
+          x: attrs.x || 100,
+          y: attrs.y || 100,
+          width: attrs.width || 100,
+          height: attrs.height || 100,
+          image: attrs.image,
+          src: attrs.src,
+          draggable: true,
+          rotation: attrs.rotation || 0,
+          zIndex: shapes.length,
+        });
+        setShapes(prev => [...prev, newShape]);
+        setSelectedId(newShape.id);
+        setSelectedIds([newShape.id]);
+        return;
+      }
+    }
+  
+    // Para otras figuras (usando x, y como coordenadas)
+    const x = typeof xOrAttrs === 'number' ? xOrAttrs : 100;
+  
     if (type === "text") {
       const newShape = new ShapeAttributes({
         type: "text",
         x: x,
         y: y,
-        fill: "#FFFF00", // Amarillo por defecto
+        fill: "#FFFF00",
         stroke: "",
         strokeWidth: 0,
         width: 200,
@@ -37,44 +66,46 @@ export const useShapes = () => {
         rotation: 0,
         fontSize: 24,
         fontFamily: "Arial",
-        zIndex: shapes.length, // Asignar el índice de capa
+        zIndex: shapes.length,
       });
       setShapes([...shapes, newShape]);
       setSelectedId(newShape.id);
-      setSelectedIds([newShape.id]); // Actualizar también selectedIds
-    } else if (type === "triangle") {
-      // Crear un triángulo con los atributos por defecto
+      setSelectedIds([newShape.id]);
+    } 
+    else if (type === "triangle") {
       const newShape = new ShapeAttributes({
         type: "triangle",
         x: x,
         y: y,
-        fill: "#FFFF00", // Amarillo por defecto
-        stroke: "#000", // Bordes negros
-        strokeWidth: 2, // Grosor del borde
-        width: 100, // Base del triángulo
-        height: 100, // Altura del triángulo
+        fill: "#FFFF00",
+        stroke: "#000",
+        strokeWidth: 2,
+        width: 100,
+        height: 100,
         draggable: true,
         rotation: 0,
-        zIndex: shapes.length, // Asignar el índice de capa
+        zIndex: shapes.length,
       });
       setShapes([...shapes, newShape]);
       setSelectedId(newShape.id);
-      setSelectedIds([newShape.id]); // Actualizar también selectedIds
-    } else {
-      // Crear otras figuras como círculo, cuadrado, etc.
+      setSelectedIds([newShape.id]);
+    }
+    else {
       const newShape = createShape(type);
-      // Asignar la posición específica si se proporciona
       newShape.x = x;
       newShape.y = y;
-      newShape.zIndex = shapes.length; // Asignar el índice de capa
+      newShape.zIndex = shapes.length;
       setShapes([...shapes, newShape]);
       setSelectedId(newShape.id);
-      setSelectedIds([newShape.id]); // Actualizar también selectedIds
+      setSelectedIds([newShape.id]);
     }
-  };
+  }, [shapes]);
+
+
+
 
   // Función para actualizar los atributos de una figura existente
-  const updateShape = (id: string, newAttrs: Partial<ShapeAttributes>) => {
+  const updateShape = useCallback((id: string, newAttrs: Partial<ShapeAttributes>) => {
     setShapes(
       shapes.map((shape) => {
         if (shape.id === id) {
@@ -83,10 +114,10 @@ export const useShapes = () => {
         return shape; // Devuelve las figuras que no se actualizan sin cambios
       })
     );
-  };
+  }, [shapes]);
 
-  // Modifica la función selectShape para manejar la selección múltiple
-  const selectShape = (id: string, isMultiSelect: boolean = false) => {
+  // Función para seleccionar una figura (con soporte para selección múltiple)
+  const selectShape = useCallback((id: string, isMultiSelect: boolean = false) => {
     if (isMultiSelect) {
       // Si es selección múltiple (con Ctrl/Shift)
       setSelectedIds(prevIds => {
@@ -103,16 +134,16 @@ export const useShapes = () => {
       setSelectedId(id);
       setSelectedIds([id]);
     }
-  };
+  }, []);
 
   // Función para deseleccionar cualquier figura
-  const deselectShape = () => {
+  const deselectShape = useCallback(() => {
     setSelectedId(null);
     setSelectedIds([]);
-  };
+  }, []);
 
-  // Añade esta función para la selección por arrastre (área)
-  const selectShapesInArea = (x1: number, y1: number, x2: number, y2: number) => {
+  // Función para seleccionar figuras en un área
+  const selectShapesInArea = useCallback((x1: number, y1: number, x2: number, y2: number) => {
     const selectedShapes = shapes.filter(shape => {
       // Comprueba si la figura está dentro del área seleccionada
       return (
@@ -122,7 +153,7 @@ export const useShapes = () => {
         shape.y + shape.height <= Math.max(y1, y2)
       );
     });
-    
+
     const ids = selectedShapes.map(shape => shape.id);
     setSelectedIds(ids);
     if (ids.length === 1) {
@@ -130,12 +161,12 @@ export const useShapes = () => {
     } else {
       setSelectedId(null); // No hay una única selección activa
     }
-    
+
     return ids;
-  };
+  }, [shapes]);
 
   // Función para eliminar una figura del lienzo
-  const deleteShape = (id: string) => {
+  const deleteShape = useCallback((id: string) => {
     // Encontrar la figura para verificar si es un grupo
     const shapeToDelete = shapes.find(shape => shape.id === id);
 
@@ -153,58 +184,10 @@ export const useShapes = () => {
       setSelectedId(null); // Deselecciona la figura si era la seleccionada
       setSelectedIds([]); // Limpiar también selectedIds
     }
-  };
-
-  // Función para actualizar el texto de una forma
-  const updateText = (id: string, newText: string) => {
-    setShapes(
-      shapes.map((shape) => {
-        if (shape.id === id) {
-          return { ...shape, text: newText };
-        }
-        return shape;
-      })
-    );
-  };
-
-  // Función para mover una figura hacia adelante (una capa)
-  const moveForward = (id: string) => {
-    const shapeIndex = shapes.findIndex(shape => shape.id === id);
-    if (shapeIndex < shapes.length - 1) {
-      const newShapes = [...shapes];
-
-      // Intercambiar posiciones
-      [newShapes[shapeIndex], newShapes[shapeIndex + 1]] =
-        [newShapes[shapeIndex + 1], newShapes[shapeIndex]];
-
-      // Actualizar zIndex
-      newShapes[shapeIndex].zIndex = shapeIndex;
-      newShapes[shapeIndex + 1].zIndex = shapeIndex + 1;
-
-      setShapes(newShapes);
-    }
-  };
-
-  // Función para mover una figura hacia atrás (una capa)
-  const moveBackward = (id: string) => {
-    const shapeIndex = shapes.findIndex(shape => shape.id === id);
-    if (shapeIndex > 0) {
-      const newShapes = [...shapes];
-
-      // Intercambiar posiciones
-      [newShapes[shapeIndex], newShapes[shapeIndex - 1]] =
-        [newShapes[shapeIndex - 1], newShapes[shapeIndex]];
-
-      // Actualizar zIndex
-      newShapes[shapeIndex].zIndex = shapeIndex;
-      newShapes[shapeIndex - 1].zIndex = shapeIndex - 1;
-
-      setShapes(newShapes);
-    }
-  };
+  }, [shapes, selectedId]);
 
   // Función para agrupar figuras
-  const groupShapes = (ids: string[]) => {
+  const groupShapes = useCallback((ids: string[]) => {
     if (ids.length < 2) return; // Se necesitan al menos 2 figuras para agrupar
 
     // Obtener las figuras que se van a agrupar
@@ -245,10 +228,10 @@ export const useShapes = () => {
     setShapes([...otherShapes, newGroup]);
     setSelectedId(groupId);
     setSelectedIds([groupId]); // Actualizar también selectedIds
-  };
+  }, [shapes]);
 
-  // Función para desagrupar figuras
-  const ungroupShapes = (groupId: string) => {
+  // Función para desagrupar figuras (continuación)
+  const ungroupShapes = useCallback((groupId: string) => {
     const group = shapes.find(shape => shape.id === groupId);
     if (!group || group.type !== 'group' || !group.children || group.children.length === 0) return;
 
@@ -269,10 +252,22 @@ export const useShapes = () => {
       setSelectedId(null);
       setSelectedIds([]); // Limpiar también selectedIds
     }
-  };
+  }, [shapes, selectedId]);
 
-  // Añade estas funciones para el manejo del clic en el canvas
-  const handleCanvasClick = (e: any) => {
+  // Función para actualizar texto
+  const updateText = useCallback((id: string, newText: string) => {
+    setShapes(
+      shapes.map((shape) => {
+        if (shape.id === id) {
+          return { ...shape, text: newText };
+        }
+        return shape;
+      })
+    );
+  }, [shapes]);
+
+  // Manejador para clics en el canvas
+  const handleCanvasClick = useCallback((e: any) => {
     if (isTextMode) {
       // Solo procesamos el clic si proviene directamente del Stage
       if (e.target === e.target.getStage()) {
@@ -287,25 +282,34 @@ export const useShapes = () => {
       // Deseleccionamos si hacemos clic en un área vacía
       deselectShape();
     }
-  };
+  }, [isTextMode, addShape, deselectShape]);
 
   // Devuelve las funciones y estados para manejar las figuras
   return {
-    shapes, // Lista de figuras
-    selectedId, // ID de la figura seleccionada
-    isTextMode, // Indica si estamos en modo texto
-    addShape, // Función para agregar una figura
-    updateShape, // Función para actualizar una figura
-    updateText, // Función para actualizar el texto de una figura
-    selectShape, // Función para seleccionar una figura
-    deselectShape, // Función para deseleccionar figuras
-    deleteShape, // Función para eliminar una figura
-    moveForward, // Función para mover una figura hacia adelante
-    moveBackward, // Función para mover una figura hacia atrás
-    groupShapes, // Función para agrupar figuras
-    ungroupShapes, // Función para desagrupar (asegúrate de que esté expuesta)
-    handleCanvasClick, // Manejador de clics en el lienzo
-    selectedIds, // Lista de IDs seleccionados
-    selectShapesInArea, // Función para seleccionar figuras en un área
+    shapes,
+    selectedId,
+    isTextMode,
+    setIsTextMode,  // Exponemos esta función para cambiar el modo
+    addShape,
+    updateShape,
+    updateText,
+    selectShape,
+    deselectShape,
+    deleteShape,
+    moveForward,
+    moveBackward,
+    groupShapes,
+    ungroupShapes,
+    handleCanvasClick,
+    selectedIds,
+    selectShapesInArea,
+
+    setShapes,
+    setSelectedId,
+    setSelectedIds
   };
 };
+
+
+
+
