@@ -34,11 +34,11 @@ const GraficadoraPrincipal: React.FC = () => {
 
   const handleAddImage = async (file: File) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       const img = new Image();
       img.src = e.target?.result as string;
-      
+
       img.onload = () => {
         const imageShape = new ShapeAttributes({
           type: 'image',
@@ -52,13 +52,13 @@ const GraficadoraPrincipal: React.FC = () => {
           rotation: 0,
           zIndex: shapes.length,
         });
-        
+
         setShapes([...shapes, imageShape]);
         setSelectedId(imageShape.id);
         setSelectedIds([imageShape.id]);
       };
     };
-    
+
     reader.readAsDataURL(file);
   };
 
@@ -98,6 +98,7 @@ const GraficadoraPrincipal: React.FC = () => {
       </div>
 
       <Toolbar
+        shapes={shapes}  // Añade esta prop
         onAddShape={addShape}
         selectedId={selectedId}
         selectedIds={selectedIds}
@@ -120,7 +121,6 @@ const GraficadoraPrincipal: React.FC = () => {
         }}
         onMoveForward={() => selectedId && moveForward(selectedId)}
         onMoveBackward={() => selectedId && moveBackward(selectedId)}
-        // para trabajar con la imagen 
         onAddImage={handleAddImage}
       />
     </div>

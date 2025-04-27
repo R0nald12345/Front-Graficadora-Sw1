@@ -1,7 +1,7 @@
 
 import { TfiText } from "react-icons/tfi";
 import { IoTriangleOutline } from "react-icons/io5";
-import { Image as ImageIcon } from 'lucide-react';
+import { Download, Image as ImageIcon, Shapes } from 'lucide-react';
 
 import {
   Square,
@@ -12,10 +12,13 @@ import {
   Copy,
   RotateCw
 } from 'lucide-react';
+import { AngularExporter } from "../../types/AngularExporter";
+import { ShapeAttributes } from "../../types/ShapeAttributes";
 
 // Define las props que recibe el componente
 interface ToolbarProps {
   onAddShape: (type: string) => void;
+  shapes: ShapeAttributes[]; // Añade esta prop
   selectedId?: string | null;
   selectedIds?: string[]; // Añadido selectedIds a la interfaz
   onDeleteShape?: () => void;
@@ -27,6 +30,7 @@ interface ToolbarProps {
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
+  shapes,
   onAddShape,
   selectedId,
   selectedIds = [], // Asignamos un valor por defecto
@@ -37,6 +41,16 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onMoveBackward,
   onAddImage,
 }) => {
+
+  const handleExport = async () => {
+    try {
+      const exporter = new AngularExporter('my-angular-design');
+      await exporter.exportToAngular(shapes);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+    }
+  };
+
 
   // Esta función para manejar la selección de archivo
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,6 +135,15 @@ const Toolbar: React.FC<ToolbarProps> = ({
         >
           <TfiText className="text-white font-bold" />
         </button>
+
+        <button 
+        className="export-button text-gray-500 border border-gray-300 hover:bg-white p-1 rounded-2xl"
+        onClick={handleExport}
+        title="Exportar a Angular"
+      >
+        <Download size={18} className="flex justify-center mx-auto"/>
+        <span>Exportar a Angular</span>
+      </button>
       </div>
 
       {/* Herramientas de edición */}
