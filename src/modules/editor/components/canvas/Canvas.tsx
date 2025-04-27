@@ -147,7 +147,7 @@ const Canvas: React.FC<CanvasProps> = ({
           x={position.x}
           y={position.y}
           scale={{ x: scale, y: scale }}
-          className="shadow-md bg-gray-100"
+          className="shadow-md bg-black"
           style={{ cursor: isTextMode ? 'text' : 'default' }}
         >
           {/* Grid background */}

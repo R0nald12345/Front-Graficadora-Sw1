@@ -18,23 +18,27 @@ const AppRoutes = () => {
         <BrowserRouter>
             <AuthProvider>
                 <Suspense fallback={<LoadingFallback />}>
+
                     <Routes>
                         {/* Rutas públicas */}
                         <Route element={<PublicRoute />}>
                             <Route path="/auth/*" element={<AuthRoutes />} />
                         </Route>
 
-
                         {/* Rutas protegidas */}
                         <Route element={<ProtectedRoute />}>
+
                             <Route path="/dashboard/*" element={<DashboardRoutes />} />
-                            <Route path="/editor/*" element={<EditorRoutes />} />
+                            {/* Agregar un Params */}
+                            <Route path="/editor/*" element={<EditorRoutes />} /> 
+
                         </Route>
 
                         {/* Ruta por defecto */}
                         <Route path="*" element={<Navigate to="/auth/login" replace />} />
 
                     </Routes>
+
                 </Suspense>
             </AuthProvider>
         </BrowserRouter>

@@ -4,28 +4,22 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const {login} = useAuth();
+  const { login,isLoading } = useAuth();
   const navigate = useNavigate();
 
- const {
+  const {
     register,
     handleSubmit,
     formState: { errors },
-    setError,
   } = useForm<LoginForm>();
 
   const onSubmit = async (data: LoginForm) => {
-    console.log("Datos enviados:", data);
     try {
       await login(data.email, data.password);
-      // Si la autenticación es exitosa, navega al dashboard
       navigate('/dashboard');
     } catch (error) {
-      // Maneja errores de autenticación
-      setError('root', {
-        type: 'manual',
-        message: 'Credenciales inválidas',
-      });
+      // Los errores ya son manejados por useAuth con SweetAlert
+      console.error(error);
     }
   };
 
@@ -87,8 +81,12 @@ const Login = () => {
             {errors.root && <p className="text-red-500 text-sm mb-4">{errors.root.message}</p>}
 
             {/* Botón de envío */}
-            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 w-full">
-              Iniciar Sesión
+            <button
+              type="submit"
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Cargando...' : 'Iniciar Sesión'}
             </button>
           </form>
         </div>

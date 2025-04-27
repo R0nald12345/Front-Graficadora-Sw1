@@ -24,8 +24,6 @@ export class AngularExporter {
         // Generar archivos de configuración
         this.generateConfigFiles(
 
-
-
         );
 
         // Generar README
@@ -58,17 +56,17 @@ export class AngularExporter {
      */
     private generateMainComponent(shapes: ShapeAttributes[]) {
         const componentFolder = this.zip.folder('src/app/components/design');
-        
+
         if (!componentFolder) {
             throw new Error('No se pudo crear la carpeta del componente');
         }
-    
+
         // Generar HTML
         componentFolder.file('design.component.html', this.generateTemplate(shapes));
-    
+
         // Generar CSS
         componentFolder.file('design.component.scss', this.generateStyles(shapes));
-    
+
         // Generar TypeScript
         componentFolder.file('design.component.ts', this.generateComponent());
     }

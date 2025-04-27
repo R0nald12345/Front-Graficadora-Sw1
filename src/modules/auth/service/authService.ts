@@ -1,58 +1,46 @@
 import axios from 'axios';
+import { AuthResponse, LoginForm, RegisterForm } from '../types/auth.types';
 
 //Me creo  una instancia de Axios con la URL base
 const API_URL = import.meta.env.VITE_API_URL;
 
-//interfaces
-interface RegisterData{
-    email: string;
-    password: string;
-    nombre: string;
-}
-
-interface LoginData{
-    email: string;
-    password: string;
-}
-
-interface AuthResponse{
-    user: {
-        id: number;
-        email: string;
-        name: string;
-    };
-    token: string;
-}
 
 // Servicio de autenticación
-const AuthService = {
-    //Registro de Usuario
-    register: async (data:RegisterData): Promise<AuthResponse> =>{
-        try {
-            const response = await axios.post<AuthResponse>(`${API_URL}/auth/register`, data);
-            return response.data;
-        }catch(error:any){
-            if(error.response){
-                throw new Error(error.response.data.message || 'Error en el registro');
-            }
+
+export const authService = {
+    async login(credentials: LoginForm) {
+      try {
+        const response = await axios.post<AuthResponse>(`${API_URL}/auth/login`, credentials);
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
         }
-        throw console.error('Error en el registro desde authService');
-        
+        return response.data;
+      } catch (error) {
+        // throw this.handleError(error);
+        console.error('Error en login authService:', error);
+      }
     },
-
-    //inicio sesion
-    login: async(data:LoginData):Promise<AuthResponse>=>{
-        try{
-            const response = await axios.post<AuthResponse>(`${API_URL}/auth/login`, data);
-            return response.data;
-        }catch(error:any){
-            if(error){
-                throw new Error(error.response.data.message || 'Error en el login');
-            }
-            throw console.error('Error en el login desde authService');
+  
+    async register(userData: RegisterForm) {
+      try {
+        const response = await axios.post<AuthResponse>(`${API_URL}/auth/register`, userData);
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
         }
-    }
-
-};
-
-export default AuthService;
+        return response.data;
+      } catch (error) {
+        console.error('Error en register authService:', error);
+      }
+    },
+  
+    logout(): void {
+      localStorage.removeItem('token');
+    },
+  
+    // private handleError(error: any): Error {
+    //   if (axios.isAxiosError(error)) {
+    //     return new Error(error.response?.data?.message || 'Error en la autenticación');
+    //   }
+    //   return new Error('Error inesperado');
+    // }
+  };

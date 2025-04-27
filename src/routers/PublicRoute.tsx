@@ -1,15 +1,10 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../modules/auth/hooks/useAuth"
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../modules/auth/hooks/useAuth';
 
-const PublicRoute = ()=>{
-    const { isAuthenticated} = useAuth();
-    //Si esta Autenticado Redirige al Dashboard
-    if( isAuthenticated ){
-        return <Navigate to="/dashboard" replace />;
-    }
+const PublicRoute = () => {
+  const { isAuthenticated } = useAuth();
 
-    // Renderiza las rutas públicas
-    return <Outlet/>
-}
+  return !isAuthenticated ? <Outlet /> : <Navigate to="/dashboard" />;
+};
 
 export default PublicRoute;
