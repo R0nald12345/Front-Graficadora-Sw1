@@ -24,6 +24,9 @@ export class ShapeAttributes {
     children?: ShapeAttributes[]; // Figuras hijas cuando es un grupo
     zIndex?: number; // Índice de capa para control de orden
 
+    parent?: string;
+    isGroup?: boolean;
+
     // Constructor para inicializar los atributos
     constructor(params: {
         id?: string, // ID opcional, se genera automáticamente si no se proporciona
@@ -46,6 +49,9 @@ export class ShapeAttributes {
          // Añadir estos parámetros opcionales
          image?: HTMLImageElement,
          src?: string,
+
+         parent?: string;
+         isGroup?: boolean;
     }) {
         this.id = params.id || `shape-${Date.now()}`; // Genera un ID único si no se proporciona
         this.type = params.type; // Asigna el tipo de figura
@@ -64,11 +70,14 @@ export class ShapeAttributes {
         this.fontFamily = params.fontFamily || "Arial"; // Fuente por defecto
         
         // Para grupos
-        this.children = params.children || []; // Lista vacía por defecto
-        this.zIndex = params.zIndex || 0; // Orden 0 por defecto
+          this.children = params.children;
+          this.parent = params.parent;
+          this.isGroup = params.isGroup;
 
         this.image = params.image;
         this.src = params.src;
+
+        
     }
 
     // Método para escalar la figura

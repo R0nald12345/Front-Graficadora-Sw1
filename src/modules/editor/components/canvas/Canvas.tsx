@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Layer, Stage, Transformer, Line } from "react-konva";
 import { useCanvas } from "../../hooks/useCanvas";
 import { useContextMenu } from "../../hooks/useContextMenu";
 import { useSelection } from "../../hooks/useSelection";
-import SelectionRect from "./SelectionReact";
+// import SelectionRect from "./SelectionReact";
 import ShapeRenderer from "./ShapeRenderer";
 import ContextMenu from "./ContextMenu";
+import { KonvaEventObject } from 'konva/lib/Node';
+import SelectionRect from './SelectionReact';
 
 interface CanvasProps {
   shapes: any[];
@@ -40,10 +42,10 @@ const Canvas: React.FC<CanvasProps> = ({
   onUngroupShapes,
   onCanvasClick
 }) => {
-  // Estado para el zoom y la posición
+  // Estados
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [stageSize, setStageSize] = useState({
+  const [stageSize] = useState({
     width: 5000,
     height: 5000
   });
@@ -99,7 +101,7 @@ const Canvas: React.FC<CanvasProps> = ({
   } = useContextMenu();
 
   // Manejador del wheel para zoom
-  const handleWheel = (e: any) => {
+  const handleWheel = (e: KonvaEventObject<MouseEvent>) => {
     e.evt.preventDefault();
     
     const scaleBy = 1.1;
@@ -166,13 +168,14 @@ const Canvas: React.FC<CanvasProps> = ({
               />
             ))}
 
-            <SelectionRect
-              isSelecting={isSelecting}
-              x={Math.min(selectionArea.x1, selectionArea.x2)}
-              y={Math.min(selectionArea.y1, selectionArea.y2)}
-              width={Math.abs(selectionArea.x2 - selectionArea.x1)}
-              height={Math.abs(selectionArea.y2 - selectionArea.y1)}
-            />
+            {isSelecting && (
+              <SelectionRect
+                x={Math.min(selectionArea.x1, selectionArea.x2)}
+                y={Math.min(selectionArea.y1, selectionArea.y2)}
+                width={Math.abs(selectionArea.x2 - selectionArea.x1)}
+                height={Math.abs(selectionArea.y2 - selectionArea.y1)}
+              />
+            )}
 
             <Transformer
               ref={transformerRef}
