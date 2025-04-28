@@ -1,34 +1,28 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../auth/hooks/useAuth"
-import { proyectoService } from "../services/proyectoService";
-import Lista from "./ListadoProyecto/Lista"
+import { useAuth } from "../../auth/hooks/useAuth";
 import { Proyecto } from "../types/proyecto.types";
-import ModalCrearProyecto from "./modal/ModalCrearProyecto";
+import { proyectoService } from "../services/proyectoService";
+import ListaInvitado from "./ListadoProyecto/ListaInvitado";
 
 
-interface HeaderProps {
-  openModal: boolean;
-  setOpenModal: (value: boolean) => void;
-}
 
-
-const ListaProyectos = ({openModal, setOpenModal}: HeaderProps) => {
-  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+const ListaProyectoInvitado = () => {
+  const [proyectosInvitado, setProyectosInvitado] = useState<Proyecto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
-  const getListProject = async () => {
+  const getListProjectInvitate = async () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem("token") || "";
       const userId = typeof user?.id === 'string' ? parseInt(user.id, 10) : user?.id || 0;
 
-      const response = await proyectoService.getProyectosByIdUsuario({
+      const response = await proyectoService.getProyectoByIdUsuarioForInvitate({
         id: userId,
         token
       });
 
-      setProyectos(response);
+      setProyectosInvitado(response);
     } catch (error) {
       console.error("Error getListProject ListaProyectos.tsx:", error);
      
@@ -39,23 +33,14 @@ const ListaProyectos = ({openModal, setOpenModal}: HeaderProps) => {
 
   useEffect(() => {
     if (user?.id) {
-      getListProject();
-      console.log(proyectos);
+        getListProjectInvitate();
     }
   }, [user]);
 
   return (
     <>
-      <ModalCrearProyecto
-        open = {openModal}
-        onClose = {() => setOpenModal(!openModal)}
-        proyectos = {proyectos}
-        setProyectos={setProyectos}
-        // tipoColegio = {datoTipoColegios}
-        // setTipoColegio={setTipoColegios}
-      />
       <section className="flex flex-col justify-center w-[80%] mx-auto mt-5">
-        <h4 className="mx-auto text-center  text-2xl font-semibold ">Mis Proyectos</h4>
+        <h4 className="mx-auto text-center  text-2xl font-semibold ">Invitado</h4>
         <div className="w-full flex bg-white rounded-2xl">
           <h4 className="font-semibold text-start w-[30%] px-3 py-2">
             Nombre
@@ -71,13 +56,12 @@ const ListaProyectos = ({openModal, setOpenModal}: HeaderProps) => {
         <ul className="overflow-y-auto scrollbar-hide bg-amber-400">
           {isLoading ? (
             <div className="text-center py-4">Cargando...</div>
-          ) : proyectos.length > 0 ? (
-            proyectos.map((proyecto) => (
-              <Lista
+          ) : proyectosInvitado.length > 0 ? (
+            proyectosInvitado.map((proyecto) => (
+              <ListaInvitado
                 key={proyecto.id}
-                proyecto={proyecto}
-                setProyectos={setProyectos}
-                proyectos={proyectos}
+                nombreProyecto={proyecto.nombre}
+                descripcionProyecto={proyecto.descripcion|| ""}
               />
             ))
           ) : (
@@ -89,4 +73,4 @@ const ListaProyectos = ({openModal, setOpenModal}: HeaderProps) => {
   );
 };
 
-export default ListaProyectos;
+export default ListaProyectoInvitado;

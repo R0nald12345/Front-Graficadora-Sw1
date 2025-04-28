@@ -1,10 +1,13 @@
+import { useState } from "react";
 import Header from "./Header"
 import ListaProyectos from "./ListaProyectos"
+import ListaInvitado from "./ListadoProyecto/ListaInvitado";
+import ListaProyectoInvitado from "./ListaProyectoInvitado";
 
 
 const Dashboard = () => {
 
-  
+  const [openModal, setOpenModal] = useState(false);
 
   return (
     <>
@@ -25,9 +28,17 @@ const Dashboard = () => {
         <div className="relative z-10 p-8 w-[70%] mx-auto">
           
           {/* Agrega aquí el resto del contenido */}
-          <Header/>
+          <Header
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          />
 
-          <ListaProyectos/>
+          <ListaProyectos
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          />
+
+          <ListaProyectoInvitado/>
         </div>
       </div>
     
