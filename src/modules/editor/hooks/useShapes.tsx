@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ShapeAttributes } from '../types/ShapeAttributes';
 import { createShape } from '../services/shapeFactory';
 import { useLayering } from './useLayering';
+import { EditorSocketService } from '../../../sockets/EditorSocketService';
 
 //AQUI ME MUESTRA LO QUE SE AGREPA EN CAPAS
 
@@ -10,20 +11,34 @@ import { useLayering } from './useLayering';
  * Hook personalizado para manejar las figuras en el canvas
  * Proporciona funcionalidades para crear, modificar, seleccionar y agrupar figuras
  */
-export const useShapes = () => {
-  // Estados principales
+export const useShapes = (proyectoId: number) => {
+  
+  
+const socketService = EditorSocketService.getInstance();
+   // =================== ESTADOS PRINCIPALES ===================
+  // Almacena todas las figuras en el canvas
   const [shapes, setShapes] = useState<ShapeAttributes[]>([]); // Almacena todas las figuras
+  
+  // Almacena el ID de la figura actualmente seleccionada
   const [selectedId, setSelectedId] = useState<string | null>(null); // ID de la figura seleccionada
+  
+    // Almacena múltiples IDs para selección múltiple (Ctrl+Click)
   const [selectedIds, setSelectedIds] = useState<string[]>([]); // IDs para selección múltiple
+
+
+   // Controla si estamos en modo de inserción de texto
   const [isTextMode, setIsTextMode] = useState(false); // Modo de inserción de texto
 
-  // Importar funciones de capas
+
+  // =================== IMPORTACIÓN DE HOOKS ===================
+  // Importa funciones para manejar el orden de las capas (z-index)
   const { moveForward, moveBackward } = useLayering({ shapes, setShapes });
 
+
+ // =================== FUNCIONES AUXILIARES ===================
   /**
-   * Calcula los límites de un grupo de figuras
-   * @param shapes Array de figuras para calcular sus límites
-   * @returns Objeto con las coordenadas y dimensiones del grupo
+   * Calcula el rectángulo que contiene todas las figuras seleccionadas
+   * Usado principalmente para agrupar figuras
    */
   const getGroupBounds = (shapes: ShapeAttributes[]) => {
     if (shapes.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
@@ -46,11 +61,14 @@ export const useShapes = () => {
     };
   };
 
+
+  // =================== MANIPULACIÓN DE FIGURAS ===================
   /**
    * Añade una nueva figura al canvas
-   * @param type Tipo de figura ('rectangle', 'circle', 'text', etc)
-   * @param xOrAttrs Coordenada X o atributos de la figura
-   * @param y Coordenada Y (opcional)
+   * Puede crear diferentes tipos: rectángulo, círculo, texto, imagen
+   * @param type - Tipo de figura a crear
+   * @param xOrAttrs - Posición X o atributos completos
+   * @param y - Posición Y (opcional)
    */
   const addShape = useCallback((
     type: string,
@@ -106,18 +124,23 @@ export const useShapes = () => {
     setSelectedIds([newShape.id]);
   }, [shapes]);
 
-  /**
-   * Actualiza los atributos de una figura existente
-   */
-  const updateShape = useCallback((id: string, newAttrs: Partial<ShapeAttributes>) => {
-    setShapes(shapes.map(shape => 
-      shape.id === id ? shape.cloneWith(newAttrs) : shape
-    ));
-  }, [shapes]);
 
+   /**
+   * Actualiza los atributos de una figura existente
+   * Se usa para modificar posición, tamaño, color, etc.
+   */
+  // const updateShape = useCallback((id: string, newAttrs: Partial<ShapeAttributes>) => {
+  //   setShapes(shapes.map(shape => 
+  //     shape.id === id ? shape.cloneWith(newAttrs) : shape
+  //   ));
+  // }, [shapes]);
+
+  // =================== SELECCIÓN DE FIGURAS ===================
   /**
-   * Selecciona una o varias figuras
-   * @param isMultiSelect Indica si es selección múltiple (con Ctrl/Shift)
+   * Maneja la selección de figuras
+   * Permite selección simple o múltiple
+   * @param id - ID de la figura a seleccionar
+   * @param isMultiSelect - true si se está usando Ctrl/Shift para selección múltiple
    */
   const selectShape = useCallback((id: string, isMultiSelect: boolean = false) => {
     if (isMultiSelect) {
@@ -132,8 +155,11 @@ export const useShapes = () => {
     }
   }, []);
 
+
+  // =================== AGRUPACIÓN DE FIGURAS ===================
   /**
    * Agrupa múltiples figuras en una sola
+   * Crea un nuevo contenedor que mantiene las figuras originales como hijos
    */
   const groupShapes = useCallback((shapeIds: string[]) => {
     if (shapeIds.length < 2) return;
@@ -159,7 +185,8 @@ export const useShapes = () => {
   }, [shapes]);
 
   /**
-   * Desagrupa un grupo de figuras
+   * Desagrupa un conjunto de figuras
+   * Restaura las figuras originales al canvas
    */
   const ungroupShapes = useCallback((groupId: string) => {
     const group = shapes.find(shape => shape.id === groupId);
@@ -198,29 +225,104 @@ export const useShapes = () => {
     deselectShape: () => {
       setSelectedId(null);
       setSelectedIds([]);
-    },
-    deleteShape: useCallback((id: string) => {
-      setShapes(shapes.filter(shape => shape.id !== id));
-      if (selectedId === id) {
+    }
+
+    // Emitir eliminación al servidor
+    socketService.emitShapeDeleted({
+      proyectoId,
+      shapeId: id
+    });
+  }, [shapes, selectedId, proyectoId]);
+
+
+    // Efecto para escuchar cambios de otros usuarios
+    useEffect(() => {
+      const handleShapeModified = (data: any) => {
+        if (data.proyectoId === proyectoId) {
+          setShapes(prevShapes => 
+            prevShapes.map(shape => 
+              shape.id === data.shapeId 
+                ? shape.cloneWith(data.changes) 
+                : shape
+            )
+          );
+        }
+      };
+  
+      const handleShapeDeleted = (data: any) => {
+        if (data.proyectoId === proyectoId) {
+          setShapes(prevShapes => 
+            prevShapes.filter(shape => shape.id !== data.shapeId)
+          );
+        }
+      };
+  
+      socketService.onShapeModified(handleShapeModified);
+      socketService.onShapeDeleted(handleShapeDeleted);
+  
+      return () => {
+        const socket = socketService.getSocketInstance();
+        if (socket) {
+          socket.off('shapeModified', handleShapeModified);
+          socket.off('shapeDeleted', handleShapeDeleted);
+        }
+      };
+    }, [proyectoId]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    return {
+      // Estados
+      shapes,
+      selectedId,
+      selectedIds,
+      isTextMode,
+      
+      // Setters
+      setIsTextMode,
+      setShapes,
+      setSelectedId,
+      setSelectedIds,
+      
+      // Funciones de manipulación
+      addShape,
+      updateShape,
+      selectShape,
+      deleteShape, // Usar la función completa que ya definiste arriba
+      
+      // Funciones de organización
+      moveForward,
+      moveBackward,
+      groupShapes,
+      ungroupShapes,
+      
+      // Funciones de interacción
+      deselectShape: () => {
         setSelectedId(null);
         setSelectedIds([]);
-      }
-    }, [shapes, selectedId]),
-    moveForward,
-    moveBackward,
-    groupShapes,
-    ungroupShapes,
-    handleCanvasClick: useCallback((e: any) => {
-      if (isTextMode && e.target === e.target.getStage()) {
-        const pos = e.target.getPointerPosition();
-        addShape("text", pos.x, pos.y);
-      } else if (e.target === e.target.getStage()) {
-        setSelectedId(null);
-        setSelectedIds([]);
-      }
-    }, [isTextMode, addShape]),
-    setShapes,
-    setSelectedId,
-    setSelectedIds
+      },
+      handleCanvasClick: useCallback((e: any) => {
+        if (isTextMode) {
+          addShape('text', e.evt.x, e.evt.y);
+          setIsTextMode(false);
+        } else {
+          setSelectedId(null);
+          setSelectedIds([]);
+        }
+      }, [isTextMode, addShape])
+    };
   };
-};

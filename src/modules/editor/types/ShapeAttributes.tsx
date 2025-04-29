@@ -52,12 +52,12 @@ export class ShapeAttributes {
         children?: ShapeAttributes[], // Figuras hijas para grupos
         zIndex?: number, // Orden de capa (opcional en params)
 
-         // Añadir estos parámetros opcionales
-         image?: HTMLImageElement,
-         src?: string,
+        // Añadir estos parámetros opcionales
+        image?: HTMLImageElement,
+        src?: string,
 
-         parent?: string;
-         isGroup?: boolean;
+        parent?: string;
+        isGroup?: boolean;
     }) {
         this.id = params.id || `shape-${Date.now()}`; // Genera un ID único si no se proporciona
         this.type = params.type; // Asigna el tipo de figura
@@ -74,17 +74,16 @@ export class ShapeAttributes {
         this.text = params.text || ""; // Texto por defecto vacío
         this.fontSize = params.fontSize || 24; // Tamaño de la fuente por defecto
         this.fontFamily = params.fontFamily || "Arial"; // Fuente por defecto
-        this.zIndex = params.zIndex ?? 0;
         
         // Para grupos
-          this.children = params.children;
-          this.parent = params.parent;
-          this.isGroup = params.isGroup;
+        this.children = params.children;
+        this.parent = params.parent;
+        this.isGroup = params.isGroup;
 
         this.image = params.image;
         this.src = params.src;
 
-        
+
     }
 
     // Método para escalar la figura
@@ -138,5 +137,63 @@ export class ShapeAttributes {
             image: newAttrs.image ?? this.image,
             src: newAttrs.src ?? this.src,
         });
+    }
+
+    // Método para convertir la figura a un objeto JSON
+
+    public toJSON(): any {
+        return {
+            id: this.id,
+            type: this.type,
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height,
+            fill: this.fill,
+            stroke: this.stroke,
+            strokeWidth: this.strokeWidth,
+            draggable: this.draggable,
+            rotation: this.rotation,
+            text: this.text,
+            fontSize: this.fontSize,
+            fontFamily: this.fontFamily,
+            src: this.src,
+            children: this.children?.map(child => child.toJSON()),
+            zIndex: this.zIndex,
+            parent: this.parent,
+            isGroup: this.isGroup
+        };
+    }
+
+    public static fromJSON(data: any): ShapeAttributes {
+        const shape = new ShapeAttributes({
+            id: data.id,
+            type: data.type,
+            x: data.x,
+            y: data.y,
+            width: data.width,
+            height: data.height,
+            fill: data.fill,
+            stroke: data.stroke,
+            strokeWidth: data.strokeWidth,
+            draggable: data.draggable,
+            rotation: data.rotation,
+            text: data.text,
+            fontSize: data.fontSize,
+            fontFamily: data.fontFamily,
+            children: data.children?.map((child: any) => ShapeAttributes.fromJSON(child)),
+            zIndex: data.zIndex,
+            parent: data.parent,
+            isGroup: data.isGroup
+        });
+
+        if (data.src) {
+            const img = new Image();
+            img.src = data.src;
+            shape.image = img;
+            shape.src = data.src;
+        }
+
+        return shape;
     }
 }

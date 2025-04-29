@@ -1,83 +1,118 @@
-import { io, Socket } from 'socket.io-client';
+// Importación corregida
+import io, { Socket } from 'socket.io-client';
+import { ShapeAttributes } from '../modules/editor/types/ShapeAttributes';
+
 
 // Definimos una clase `EditorSocketService` para manejar las conexiones y eventos de WebSocket
 export class EditorSocketService {
-    // Creamos una propiedad privada `socket` de tipo `Socket` para mantener la conexión WebSocket
-    private socket: Socket;
-
-    // Instancia estática única de la clase (patrón Singleton)
     private static instance: EditorSocketService;
+    private socket: Socket | null = null;
 
-    // Constructor privado para asegurarnos de que solo haya una instancia de la clase
-    private constructor() {
-        // Inicializamos la conexión WebSocket usando la URL especificada en el entorno de variables
-        // Si no se encuentra la variable de entorno `VITE_SOCKET_URL`, usa 'http://localhost:3000' por defecto
-        this.socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000', {
-            // Enviamos un token de autenticación usando `localStorage` para mantener la sesión del usuario
-            auth: {
-                token: localStorage.getItem('token')
-            }
-        });
+    private constructor() { }
 
-        // Llamamos a la función `setupListeners` para configurar los eventos del WebSocket
-        this.setupListeners();
-    }
-
-    // Método estático para obtener la instancia única de la clase (Singleton)
     public static getInstance(): EditorSocketService {
-        // Si la instancia no existe, la creamos
         if (!EditorSocketService.instance) {
             EditorSocketService.instance = new EditorSocketService();
         }
-        // Retornamos la instancia única
         return EditorSocketService.instance;
     }
 
-    // Método privado para configurar los eventos del WebSocket
-    private setupListeners(): void {
-        // Configuramos un listener para el evento 'connect', que se dispara cuando el cliente se conecta al servidor
+    private getSocket(): Socket {
+        if (!this.socket || !this.socket.connected) {
+            if (this.socket) {
+                this.socket.close();
+            }
+            this.socket = io('http://localhost:3000', {
+                transports: ['websocket'],
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                autoConnect: true
+            });
+            // No llamar a setupListeners aquí
+            this.initializeSocketListeners(); // Cambiar nombre y lógica
+        }
+        return this.socket;
+    }
+
+    private initializeSocketListeners(): void {
+        if (!this.socket) return; // Prevenir llamadas si no hay socket
+
         this.socket.on('connect', () => {
-            console.log('Conectado al servidor de WebSocket');
+            console.log('Conectado al servidor WebSocket', this.socket?.id);
         });
 
-        // Configuramos un listener para el evento 'disconnect', que se dispara cuando el cliente se desconecta del servidor
-        this.socket.on('disconnect', () => {
-            console.log('Desconectado del servidor de WebSocket');
+        this.socket.on('disconnect', (reason) => {
+            console.log('Desconectado del servidor WebSocket', reason);
+            this.socket = null;
         });
 
-        // Configuramos un listener para el evento 'error', que se dispara si hay algún error con la conexión
         this.socket.on('error', (error) => {
-            console.error('Error de Socket:', error);
+            console.error('Error en la conexión:', error);
+            this.socket = null;
         });
     }
 
-    // Método para unirse a una sala de edición (basada en un `proyectoId`)
+
+    // Métodos públicos para el manejo de la sala y eventos
     public joinEditorRoom(proyectoId: number): void {
-        // Enviamos un evento al servidor para unirse a una sala de WebSocket relacionada con un proyecto
-        this.socket.emit('joinEditor', { proyectoId });
+        this.getSocket().emit('joinEditor', { proyectoId });
     }
 
-    // Método para abandonar una sala de edición (basada en un `proyectoId`)
-    public leaveEditorRoom(proyectoId: number): void {
-        // Enviamos un evento al servidor para salir de la sala de edición del proyecto
-        this.socket.emit('leaveEditor', { proyectoId });
-    }
-
-    // Método para emitir actualizaciones del diagrama (enviar datos a los demás clientes)
     public emitDiagramUpdate(data: any): void {
-        // Emitimos un evento 'diagramUpdate' al servidor con los datos del diagrama actualizados
-        this.socket.emit('diagramUpdate', data);
+        this.getSocket().emit('diagramUpdate', data);
     }
 
-    // Método para escuchar las actualizaciones del diagrama y ejecutar un callback cuando ocurren
     public onDiagramUpdate(callback: (data: any) => void): void {
-        // Configuramos un listener para el evento 'diagramUpdate' que recibirá los datos cuando el servidor lo emita
-        this.socket.on('diagramUpdate', callback);
+        this.getSocket().on('diagramUpdate', callback);
     }
 
-    // Método para desconectar el cliente del servidor WebSocket
-    public disconnect(): void {
-        // Llamamos al método `disconnect` de la instancia de `socket` para cerrar la conexión WebSocket
-        this.socket.disconnect();
+    public getSocketInstance(): Socket | null {
+        return this.socket;
     }
+
+    public disconnect(): void {
+        if (this.socket && this.socket.connected) {
+            console.log('Desconectando socket:', this.socket.id);
+            this.socket.disconnect();
+            this.socket = null;
+        }
+    }
+
+     // Método para emitir actualizaciones del canvas
+     public emitCanvasUpdate(data: any): void {
+        const socket = this.getSocket();
+        socket.emit('canvasUpdate', data);
+    }
+
+    // Método para escuchar actualizaciones del canvas
+    public onCanvasUpdated(callback: (data: any) => void): void {
+        const socket = this.getSocket();
+        socket.on('canvasUpdated', callback);
+    }
+
+    public emitShapeModified(data: { 
+        proyectoId: number, 
+        shapeId: string, 
+        changes: Partial<ShapeAttributes> 
+      }) {
+        this.getSocket().emit('shapeModified', data);
+      }
+    
+      public onShapeModified(callback: (data: any) => void) {
+        this.getSocket().on('shapeModified', callback);
+      }
+    
+      public emitShapeDeleted(data: { 
+        proyectoId: number, 
+        shapeId: string 
+      }) {
+        this.getSocket().emit('shapeDeleted', data);
+      }
+    
+      public onShapeDeleted(callback: (data: any) => void) {
+        this.getSocket().on('shapeDeleted', callback);
+      }
+
 }
+
