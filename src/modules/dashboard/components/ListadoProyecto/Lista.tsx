@@ -7,6 +7,7 @@ import { FC, useState } from "react";
 import { useAuth } from "../../../auth/hooks/useAuth";
 import { proyectoService } from "../../services/proyectoService";
 import ModalEditarProyecto from "../modal/ModalEditarProyecto";
+import { useNavigate } from "react-router-dom";
 
 interface ListaProps {
   proyecto: Proyecto;
@@ -16,6 +17,7 @@ interface ListaProps {
 
 const Lista: FC<ListaProps> = ({ proyecto, setProyectos, proyectos }) => {
 
+  const navigate = useNavigate();
   const { id, nombre, descripcion } = proyecto;
   const [open, setOpen] = useState(false);
 
@@ -94,7 +96,7 @@ const Lista: FC<ListaProps> = ({ proyecto, setProyectos, proyectos }) => {
 
         <div className="font-semibold flex justify-around w-[20%] py-2">
           <IoEyeSharp
-            // onClick={() => changeRutaEditarFormulario(id)}
+            onClick={() => navigate(`/dashboard/proyecto/${id}`)}
             className="text-3xl p-1 rounded-xl bg-blue-950 text-white cursor-pointer"
           />
           <BiEditAlt

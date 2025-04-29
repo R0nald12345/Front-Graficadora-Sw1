@@ -33,20 +33,30 @@ const EditorContext = createContext<EditorContextProps | undefined>(undefined);
 export const EditorProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const shapeHook = useShapes();
   
+  // Agregar las funciones que faltan
+  const updateText = (id: string, newText: string) => {
+    shapeHook.updateShape(id, { text: newText });
+  };
+
+  const selectShapesInArea = (x1: number, y1: number, x2: number, y2: number) => {
+    const shapesEnArea = shapeHook.shapes.filter(shape => {
+      // Calcular si la figura está dentro del área seleccionada
+      return shape.x >= Math.min(x1, x2) &&
+             shape.x + shape.width <= Math.max(x1, x2) &&
+             shape.y >= Math.min(y1, y2) &&
+             shape.y + shape.height <= Math.max(y1, y2);
+    });
+    // Establecer los IDs seleccionados
+    shapeHook.setSelectedIds(shapesEnArea.map(shape => shape.id));
+  };
+  
   return (
     <EditorContext.Provider value={{
-      ...shapeHook
+      ...shapeHook,
+      updateText,
+      selectShapesInArea
     }}>
       {children}
     </EditorContext.Provider>
   );
-};
-
-// Hook personalizado para usar el contexto
-export const useEditorContext = () => {
-  const context = useContext(EditorContext);
-  if (context === undefined) {
-    throw new Error('useEditorContext debe ser usado dentro de un EditorProvider');
-  }
-  return context;
 };

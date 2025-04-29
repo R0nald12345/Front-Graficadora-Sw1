@@ -67,7 +67,17 @@ const GraficadoraPrincipal: React.FC = () => {
     <div className="flex flex-col h-screen">
       <div className="flex flex-1 overflow-hidden">
         <section className="w-[15%] h-full">
-          <SidebarGraficadora onToolSelect={addShape} />
+        <SidebarGraficadora 
+          onToolSelect={addShape}
+          shapes={shapes}
+          selectedId={selectedId}
+          onSelectShape={selectShape}
+          onDeleteShape={deleteShape}
+          onMoveForward={moveForward}
+          onMoveBackward={moveBackward}
+          onGroupShapes={groupShapes}
+          onUngroupShapes={ungroupShapes}
+        />
         </section>
 
         <section className="w-[70%] h-full">

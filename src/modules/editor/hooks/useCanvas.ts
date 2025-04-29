@@ -1,6 +1,5 @@
 import { useRef, useEffect } from "react";
 import Konva from "konva";
-import { KonvaEventObject } from 'konva/lib/Node';
 import { ShapeAttributes } from "../types/ShapeAttributes";
 
 /**

@@ -3,6 +3,9 @@ import { ShapeAttributes } from '../types/ShapeAttributes';
 import { createShape } from '../services/shapeFactory';
 import { useLayering } from './useLayering';
 
+//AQUI ME MUESTRA LO QUE SE AGREPA EN CAPAS
+
+
 /**
  * Hook personalizado para manejar las figuras en el canvas
  * Proporciona funcionalidades para crear, modificar, seleccionar y agrupar figuras
@@ -170,6 +173,18 @@ export const useShapes = () => {
     setSelectedIds([]);
   }, [shapes]);
 
+
+  
+  const selectShapesInArea = useCallback((x1: number, y1: number, x2: number, y2: number) => {
+    const selectedShapes = shapes.filter(shape => {
+      return shape.x >= Math.min(x1, x2) &&
+             shape.x + shape.width <= Math.max(x1, x2) &&
+             shape.y >= Math.min(y1, y2) &&
+             shape.y + shape.height <= Math.max(y1, y2);
+    });
+    setSelectedIds(selectedShapes.map(shape => shape.id));
+  }, [shapes, setSelectedIds]);
+
   return {
     shapes,
     selectedId,
@@ -177,6 +192,7 @@ export const useShapes = () => {
     isTextMode,
     setIsTextMode,
     addShape,
+    selectShapesInArea,
     updateShape,
     selectShape,
     deselectShape: () => {

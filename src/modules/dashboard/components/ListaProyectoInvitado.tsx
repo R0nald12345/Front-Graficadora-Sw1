@@ -40,7 +40,7 @@ const ListaProyectoInvitado = () => {
   return (
     <>
       <section className="flex flex-col justify-center w-[80%] mx-auto mt-5">
-        <h4 className="mx-auto text-center  text-2xl font-semibold ">Invitado</h4>
+        <h4 className="mx-auto text-center  text-2xl font-semibold text-white">Invitado</h4>
         <div className="w-full flex bg-white rounded-2xl">
           <h4 className="font-semibold text-start w-[30%] px-3 py-2">
             Nombre
@@ -53,7 +53,7 @@ const ListaProyectoInvitado = () => {
           </h4>
         </div>
 
-        <ul className="overflow-y-auto scrollbar-hide bg-amber-400">
+        <ul className="overflow-y-auto scrollbar-hide bg-white/50">
           {isLoading ? (
             <div className="text-center py-4">Cargando...</div>
           ) : proyectosInvitado.length > 0 ? (

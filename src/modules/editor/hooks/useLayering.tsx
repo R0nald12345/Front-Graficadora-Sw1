@@ -54,12 +54,14 @@ export const useLayering = ({ shapes, setShapes }: UseLayeringProps) => {
       // Reordenar formas
       const newShapes = [...otherShapes, shape];
       
-      // Actualizar todos los zIndex
-      const updatedShapes = newShapes.map((shape, idx) => ({
-        ...shape,
-        zIndex: idx
-      }));
-
+      // Crear nuevas instancias de ShapeAttributes
+      const updatedShapes = newShapes.map((shape, idx) => 
+        new ShapeAttributes({
+          ...shape,
+          zIndex: idx
+        })
+      );
+  
       setShapes(updatedShapes);
     }
   }, [shapes, setShapes]);
@@ -74,12 +76,14 @@ export const useLayering = ({ shapes, setShapes }: UseLayeringProps) => {
       // Reordenar formas
       const newShapes = [shape, ...otherShapes];
       
-      // Actualizar todos los zIndex
-      const updatedShapes = newShapes.map((shape, idx) => ({
-        ...shape,
-        zIndex: idx
-      }));
-
+      // Crear nuevas instancias de ShapeAttributes
+      const updatedShapes = newShapes.map((shape, idx) => 
+        new ShapeAttributes({
+          ...shape,
+          zIndex: idx
+        })
+      );
+  
       setShapes(updatedShapes);
     }
   }, [shapes, setShapes]);

@@ -3,11 +3,11 @@ import { Layer, Stage, Transformer, Line } from "react-konva";
 import { useCanvas } from "../../hooks/useCanvas";
 import { useContextMenu } from "../../hooks/useContextMenu";
 import { useSelection } from "../../hooks/useSelection";
-// import SelectionRect from "./SelectionReact";
 import ShapeRenderer from "./ShapeRenderer";
 import ContextMenu from "./ContextMenu";
 import { KonvaEventObject } from 'konva/lib/Node';
 import SelectionRect from './SelectionReact';
+import Konva from 'konva';
 
 interface CanvasProps {
   shapes: any[];
@@ -101,24 +101,36 @@ const Canvas: React.FC<CanvasProps> = ({
   } = useContextMenu();
 
   // Manejador del wheel para zoom
-  const handleWheel = (e: KonvaEventObject<MouseEvent>) => {
+  const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
     
     const scaleBy = 1.1;
     const stage = stageRef.current;
+    
+    // Verificar si stage existe
+    if (!stage) return;
+    
     const oldScale = scale;
-
+    const pointer = stage.getPointerPosition();
+    
+    // Verificar si pointer existe
+    if (!pointer) return;
+  
     const mousePointTo = {
-      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
-      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
+      x: pointer.x / oldScale - stage.x() / oldScale,
+      y: pointer.y / oldScale - stage.y() / oldScale
     };
-
+  
     const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
+  
+    // Obtener la nueva posición del puntero
+    const newPointer = stage.getPointerPosition();
+    if (!newPointer) return;
+  
     setScale(newScale);
     setPosition({
-      x: -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale,
-      y: -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale
+      x: -(mousePointTo.x - newPointer.x / newScale) * newScale,
+      y: -(mousePointTo.y - newPointer.y / newScale) * newScale
     });
   };
 
@@ -178,7 +190,7 @@ const Canvas: React.FC<CanvasProps> = ({
             )}
 
             <Transformer
-              ref={transformerRef}
+              ref={transformerRef as React.RefObject<Konva.Transformer>}
               boundBoxFunc={(oldBox, newBox) => {
                 if (newBox.width < 5 || newBox.height < 5) {
                   return oldBox;

@@ -1,32 +1,38 @@
 export class ShapeAttributes {
     // Atributos de la figura
-    id: string; // Identificador único de la figura
-    type: string; // Tipo de figura (rectángulo, círculo, línea, etc.)
-    x: number; // Posición X de la figura en el lienzo
-    y: number; // Posición Y de la figura en el lienzo
-    width: number; // Ancho de la figura
-    height: number; // Alto de la figura
-    fill: string; // Color de relleno de la figura
-    stroke: string; // Color del borde de la figura
-    strokeWidth: number; // Grosor del borde de la figura
-    draggable: boolean; // Indica si la figura es arrastrable
-    rotation: number; // Rotación de la figura en grados
-
-    image?: HTMLImageElement; // La imagen cargada
-    src?: string; // La URL o datos base64 de la imagen
-
-    //Atributos para el texto
-    text?: string; // Texto a mostrar
-    fontSize: number; // Tamaño de la fuente
-    fontFamily: string; // Fuente utilizada
-    
-    // Atributos para grupos
-    children?: ShapeAttributes[]; // Figuras hijas cuando es un grupo
-    zIndex?: number; // Índice de capa para control de orden
-
-    parent?: string;
-    isGroup?: boolean;
-
+ // Propiedades de identificación
+ id: string;                   // Identificador único de la figura
+ type: string;                 // Tipo de figura (rectángulo, círculo, línea, etc.)
+ 
+ // Propiedades de posición y tamaño
+ x: number;                    // Posición X de la figura en el lienzo
+ y: number;                    // Posición Y de la figura en el lienzo
+ width: number;                // Ancho de la figura
+ height: number;               // Alto de la figura
+ rotation: number;             // Rotación de la figura en grados
+ 
+ // Propiedades de estilo
+ fill: string;                 // Color de relleno de la figura
+ stroke: string;               // Color del borde de la figura
+ strokeWidth: number;          // Grosor del borde de la figura
+ 
+ // Propiedades de comportamiento
+ draggable: boolean;           // Indica si la figura es arrastrable
+ zIndex: number;               // Índice de capa para control de orden (importante: cambiado de opcional a requerido)
+ 
+ // Propiedades para imágenes
+ image?: HTMLImageElement;     // La imagen cargada
+ src?: string;                 // La URL o datos base64 de la imagen
+ 
+ // Propiedades para texto
+ text?: string;                // Texto a mostrar
+ fontSize: number;             // Tamaño de la fuente
+ fontFamily: string;           // Fuente utilizada
+ 
+ // Propiedades para grupos
+ children?: ShapeAttributes[]; // Figuras hijas cuando es un grupo
+ parent?: string;             // ID del grupo padre
+ isGroup?: boolean;           // Indica si es un grupo
     // Constructor para inicializar los atributos
     constructor(params: {
         id?: string, // ID opcional, se genera automáticamente si no se proporciona
@@ -44,7 +50,7 @@ export class ShapeAttributes {
         fontSize?: number, // Tamaño de la fuente inicial (opcional)
         fontFamily?: string, // Fuente inicial (opcional)
         children?: ShapeAttributes[], // Figuras hijas para grupos
-        zIndex?: number, // Orden de capa
+        zIndex?: number, // Orden de capa (opcional en params)
 
          // Añadir estos parámetros opcionales
          image?: HTMLImageElement,
@@ -68,6 +74,7 @@ export class ShapeAttributes {
         this.text = params.text || ""; // Texto por defecto vacío
         this.fontSize = params.fontSize || 24; // Tamaño de la fuente por defecto
         this.fontFamily = params.fontFamily || "Arial"; // Fuente por defecto
+        this.zIndex = params.zIndex ?? 0;
         
         // Para grupos
           this.children = params.children;

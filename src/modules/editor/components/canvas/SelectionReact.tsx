@@ -1,22 +1,13 @@
 import { Rect } from "react-konva";
 
 interface SelectionRectProps {
-  isSelecting: boolean;
   x: number;
   y: number;
   width: number;
   height: number;
 }
 
-const SelectionRect: React.FC<SelectionRectProps> = ({
-  isSelecting,
-  x,
-  y,
-  width,
-  height
-}) => {
-  if (!isSelecting) return null;
-
+const SelectionRect: React.FC<SelectionRectProps> = ({ x, y, width, height }) => {
   return (
     <Rect
       x={x}
@@ -24,7 +15,7 @@ const SelectionRect: React.FC<SelectionRectProps> = ({
       width={width}
       height={height}
       fill="rgba(0, 161, 255, 0.3)"
-      stroke="#00A1FF"
+      stroke="rgb(0, 161, 255)"
       strokeWidth={1}
     />
   );

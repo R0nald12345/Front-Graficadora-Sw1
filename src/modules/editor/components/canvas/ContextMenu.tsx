@@ -1,5 +1,4 @@
 // ContextMenu.tsx
-import React from "react";
 
 interface ContextMenuProps {
   x: number;

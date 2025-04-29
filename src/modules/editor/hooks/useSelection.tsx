@@ -1,16 +1,16 @@
 // useSelection.tsx
-import { useState, useRef } from "react";
-import Konva from "konva";
+import { useState, RefObject } from "react";
+import { Stage } from "konva/lib/Stage";
 
 interface UseSelectionProps {
-  stageRef: React.RefObject<Konva.Stage>;
+  stageRef:  RefObject<Stage | null>;  
   onDeselectShape: () => void;
   onCanvasClick: (e: any) => void;
   onSelectShapesInArea: (x1: number, y1: number, x2: number, y2: number) => void;
 }
 
 export const useSelection = ({
-  stageRef,
+  // stageRef,
   onDeselectShape,
   onCanvasClick,
   onSelectShapesInArea
