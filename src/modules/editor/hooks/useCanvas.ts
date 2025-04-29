@@ -19,8 +19,8 @@ interface CanvasProps {
  */
 export const useCanvas = ({ 
   selectedId, 
-  shapes, 
-  onSelect, 
+  // shapes, 
+  // onSelect, 
   onDeselect 
 }: CanvasProps) => {
   // Referencias a los elementos principales de Konva
